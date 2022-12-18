@@ -16,22 +16,6 @@ html, body, main{
 	height: 100vh;
 }
 
-@media screen and (max-width: 700px) {
-    .content {
-		display: flex;
-        flex-direction: column;   
-		height: 100vh; 
-    }
-
-	.imageText {
-		max-height: 100px !important;
-	}
-
-	.imagePic {
-		max-height: 400px !important;
-	}
-}
-
 .image-container {
 	flex-grow: 1;
 	width: 100%;
@@ -101,4 +85,23 @@ h1, h2, h3, p, a {
 	50.01% { opacity: 0; }
 	100% { opacity: 0; }
 }
-/* @end */
+
+@media screen and (max-width: 700px) {
+    .content {
+		display: flex;
+        flex-direction: column;   
+		height: 100vh; 
+    }
+
+	.imageText {
+		max-height: 100px !important;
+	}
+
+	.imagePic {
+		max-height: 400px !important;
+	}
+
+	.intro {
+		font-size: 1.5em;
+	}
+}
