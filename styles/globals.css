@@ -1,14 +1,20 @@
-html, body, main{
-	-webkit-font-smoothing:antialiased;
+html,
+body,
+main {
+	-webkit-font-smoothing: antialiased;
 	font-family: "Comic Sans MS", sans-serif;
 
-	margin:0;
+	margin: 0;
 	width: 100%;
 	height: 100%;
 	background-image: url("https://i.imgur.com/SHZe50s.gif");
 }
 
-#__next { margin: 0; min-height: 100vh; padding: 0; }
+#__next {
+	margin: 0;
+	min-height: 100vh;
+	padding: 0;
+}
 
 .content {
 	display: flex;
@@ -28,23 +34,32 @@ html, body, main{
 	max-width: fit-content;
 }
 
-.center{
+.center {
 	text-align: center;
 }
 
-.intro{
-	font-size:3em;
-    margin-bottom: 0;
-}
-.max { 
-    display: block;
-    width: 100%;
-	height: 100%;
-    word-wrap: break-word;
+.intro {
+	font-size: 3em;
+	margin-bottom: 0;
 }
 
-h1, h2, h3, p, a {
-  color: yellow;
+.max {
+	display: block;
+	width: 100%;
+	height: 100%;
+	word-wrap: break-word;
+}
+
+.link {
+	padding: 20px;
+}
+
+h1,
+h2,
+h3,
+p,
+a {
+	color: yellow;
 }
 
 /* @group Blink */
@@ -53,45 +68,105 @@ h1, h2, h3, p, a {
 	-moz-animation: blink .75s linear infinite;
 	-ms-animation: blink .75s linear infinite;
 	-o-animation: blink .75s linear infinite;
-	 animation: blink .75s linear infinite;
+	animation: blink .75s linear infinite;
 }
+
 @-webkit-keyframes blink {
-	0% { opacity: 1; }
-	50% { opacity: 1; }
-	50.01% { opacity: 0; }
-	100% { opacity: 0; }
+	0% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 1;
+	}
+
+	50.01% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 0;
+	}
 }
+
 @-moz-keyframes blink {
-	0% { opacity: 1; }
-	50% { opacity: 1; }
-	50.01% { opacity: 0; }
-	100% { opacity: 0; }
+	0% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 1;
+	}
+
+	50.01% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 0;
+	}
 }
+
 @-ms-keyframes blink {
-	0% { opacity: 1; }
-	50% { opacity: 1; }
-	50.01% { opacity: 0; }
-	100% { opacity: 0; }
+	0% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 1;
+	}
+
+	50.01% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 0;
+	}
 }
+
 @-o-keyframes blink {
-	0% { opacity: 1; }
-	50% { opacity: 1; }
-	50.01% { opacity: 0; }
-	100% { opacity: 0; }
+	0% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 1;
+	}
+
+	50.01% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 0;
+	}
 }
+
 @keyframes blink {
-	0% { opacity: 1; }
-	50% { opacity: 1; }
-	50.01% { opacity: 0; }
-	100% { opacity: 0; }
+	0% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 1;
+	}
+
+	50.01% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 0;
+	}
 }
 
 @media screen and (max-width: 700px) {
-    .content {
+	.content {
 		display: flex;
-        flex-direction: column;   
-		height: 100vh; 
-    }
+		flex-direction: column;
+		height: 100vh;
+	}
 
 	.imageText {
 		max-height: 100px !important;
@@ -104,4 +179,14 @@ h1, h2, h3, p, a {
 	.intro {
 		font-size: 1.5em;
 	}
+}
+
+@font-face {
+	font-family: 'Mansalva';
+	src: url('/fonts/Mansalva-Regular.ttf');
+}
+
+@font-face {
+	font-family: 'WeThePeople';
+	src: url('/fonts/WeThePeople.ttf');
 }
