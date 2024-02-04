@@ -26,7 +26,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="center top">
-        <audio id="audioPlayer" src={footbongsAndBeerBallAnthem} autoPlay></audio>
+        <audio id="audioPlayer" src={footbongsAndBeerBallAnthem} autoPlay onLoad={play}></audio>
         <div className="header center">
           <h1 className="tab blink intro">FootBongs and Beerball</h1>
           <div className="navLinks">
