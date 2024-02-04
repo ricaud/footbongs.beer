@@ -2,17 +2,20 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
-import loserTitle from "../public/2022-league-loser.gif";
-import loserName from "../public/trent-glitter.gif";
-import loser from "../public/trent-smaller.png";
+import loserTitle from "../public/2023/FBandB-2023-LOOOSSEERRR.gif";
+import loserName from "../public/2023/kyle-text.gif";
+import loser from "../public/2023/kyle-teletubby.png";
 
-function img({ src, width, height }) {
-  const style = { paddingBottom: `min(350px, ${100 / (width / height)}%)` };
-  return (
-    <div className={`next-image-wrapper`} style={style}>
-      <Image className="next-image" src={src} fill />
-    </div>
-  );
+import footbongsAndBeerBallAnthem from "../public/footbongs-and-beerball.mp3";
+
+function play() {
+  var audio = document.getElementById("audioPlayer");
+  audio.play();
+}
+
+function pause() {
+  var audio = document.getElementById("audioPlayer");
+  audio.pause();
 }
 
 export default function Home() {
@@ -22,50 +25,32 @@ export default function Home() {
         <title>fOotBoNgS n B3eRbalL</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="center">
-        <div>
+      <main className="center top">
+        <audio id="audioPlayer" src={footbongsAndBeerBallAnthem} autoPlay></audio>
+        <div className="header center">
           <h1 className="tab blink intro">FootBongs and Beerball</h1>
+          <div className="navLinks">
+            <Link href="/constitution" className="link">Constitution</Link>
+            <Link href="/previousYears/2022" className="link">2022 Loser (Trent)</Link>
+          </div>
         </div>
+        <br/>
         <div className="content center">
-          <div className="image-container center imageText">
-            <Image src={loserTitle} alt="your 2022 league loser" fill className={"image"} />
-          </div>
-          <div className="image-container center imagePic">
-            <Image src={loser} alt="a picture of the league loser (trent)" fill className={"image"} />
-          </div>
-          <div className="image-container center imageText">
-            <Image src={loserName} alt="glitter text that says trent bailey" fill className={"image"} />
-          </div>
-          <Link href="/constitution" className="link">Constitution</Link>
+            <div className="image-continaer center imageText">
+              <Image src={loserTitle} alt="your 2022 league loser" fill className={"image"} />
+            </div>
+            <div className="image-continaer center imagePic">
+              <Image src={loser} alt="a picture of the league loser" fill className={"image"} />
+            </div>
+            <div className="image-continaer center imageText">
+              <Image src={loserName} alt="glitter text that says the losers name" fill className={"image"} />
+            </div>
+        </div>
+        <div className="center audioControls">
+            <button class="play" onClick={play}>Play</button>
+            <button class="pause" onClick={pause}>Pause</button>
         </div>
       </main>
     </>
   );
 }
-
-/*
-x<div className="image-container center">
-              <Image
-                src={loserTitle}
-                alt='your 2022 league loser'
-                fill
-                className={'image'}
-              />
-            </div>
-            <div className="image-container center">
-              <Image
-                src={loser}
-                alt='a picture of the league loser (trent)'
-                fill
-                className={'image'}
-              />
-            </div>
-            <div className="image-container center">
-              <Image
-                src={loserName}
-                alt='glitter text that says trent bailey'
-                fill
-                className={'image'}
-              />
-            </div>
-            */

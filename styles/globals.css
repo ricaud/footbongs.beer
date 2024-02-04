@@ -11,11 +11,10 @@
 html, body, main{
 	-webkit-font-smoothing:antialiased;
 	font-family: "Comic Sans MS", sans-serif;
-
-	margin:0;
-	width: 100%;
-	height: 100%;
-	background-image: url("https://i.imgur.com/SHZe50s.gif");
+	height: 100vh;
+	margin: 0px;
+	/*background-image: url("https://i.imgur.com/Ot0YekQ.gif");*/
+	background-image: url("https://i.imgur.com/mq0xpXs.gif");
 }
 
 h1, h2, h3, p, a {
@@ -24,10 +23,26 @@ h1, h2, h3, p, a {
 
 #__next { margin: 0; min-height: 100vh; padding: 0; }
 
+.audioPlayer {
+	position: absolute;
+  	bottom: 0;
+  	left: 0;
+}
+
+.top {
+	max-height: 100vh;
+}
+
+.header {
+	display: flex;
+	flex-direction: column;
+}
+
 .content {
+	flex: 2;
+	max-height: 80%;
 	display: flex;
 	flex-direction: row;
-	height: 100vh;
 }
 
 .image-container {
@@ -35,9 +50,16 @@ h1, h2, h3, p, a {
 	width: 100%;
 }
 
+.imageText {
+	flex:2 ;
+}
+
+.imagePic {
+	flex: 1;
+}
+
 .image {
 	object-fit: contain;
-	height: 100%;
 	position: relative !important;
 	max-width: fit-content;
 }
@@ -49,6 +71,10 @@ h1, h2, h3, p, a {
 .intro{
 	font-size:3em;
     margin-bottom: 0;
+}
+
+.navLinks {
+	padding-top: 5px;
 }
 
 .max { 
