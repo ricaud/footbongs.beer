@@ -6,7 +6,6 @@ import loserTitle from "../public/2023/FBandB-2023-LOOOSSEERRR.gif";
 import loserName from "../public/2023/kyle-text.gif";
 import loser from "../public/2023/kyle-teletubby.png";
 
-import silenceMp3 from "../public/silence.mp3"
 import footbongsAndBeerBallAnthem from "../public/footbongs-and-beerball.mp3";
 
 function play() {
@@ -27,7 +26,6 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="center top">
-        <iframe src={silenceMp3} allow="autoplay" id="audio"></iframe>
         <audio id="audioPlayer" src={footbongsAndBeerBallAnthem} autoPlay></audio>
         <div className="header center">
           <h1 className="tab blink intro">FootBongs and Beerball</h1>
