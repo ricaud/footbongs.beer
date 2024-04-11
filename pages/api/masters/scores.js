@@ -40,8 +40,15 @@ export default function handler(req, res) {
             todayScore: todayScore,
             thru: thru,
           };
-          setData(data);
-        }
+
+          console.log(data[name])
+
+        } 
+
+        console.log("==========")
+        console.log(JSON.stringify(data))
+
+
     });
 
     res.status(200).json(data)
