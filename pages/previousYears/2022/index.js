@@ -26,6 +26,7 @@ export default function Year2022() {
         <div>
           <h1 className="tab blink intro">FootBongs and Beerball</h1>
           <Link href="/constitution" className="link">Constitution</Link>
+          <Link href="/masters" className="link">Masters</Link>
           <Link href="/" className="link">Home</Link>
         </div>
         <br/>
