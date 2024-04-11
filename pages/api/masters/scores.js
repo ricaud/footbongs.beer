@@ -1,5 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import HTMLParser from "node-html-parser";
+import fetch from 'node-fetch';
 
 const tournamentData = {
     Kyle: ["Scottie Scheffler", "Will Zalatoris", "Cameron Smith", "Patrick Reed"],
@@ -13,7 +14,6 @@ const tournamentData = {
   };
 
 export default function handler(req, res) {
-    const fetch = require('node-fetch');
     let data = {};
 
     console.log("Fetching scores from ESPN...");
