@@ -13,33 +13,10 @@ const tournamentData = {
   };
 
 export default function handler(req, res) {
-
+    const fetch = require('node-fetch');
     let data = {};
-    console.log("fetching...");
-    const https = require('https');
 
-    const options = {
-      hostname: 'espn.com',
-      port: 443,
-      path: '/golf/leaderboard',
-      method: 'GET',
-    };
-    
-    const request = https.request(options, (response) => {
-      let data = '';
-    
-      response.on('data', (chunk) => {
-        data += chunk;
-      });
-    
-      response.on('end', () => {
-        console.log(data);
-      });
-    });
-    
-    request.end();
-
-
+    console.log("Fetching scores from ESPN...");
 
     fetch("https://www.espn.com/golf/leaderboard")
       .then((res) => res.text())
