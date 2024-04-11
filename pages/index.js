@@ -7,6 +7,7 @@ import loserName from "../public/2023/kyle-text.gif";
 import loser from "../public/2023/kyle-teletubby.png";
 
 import footbongsAndBeerBallAnthem from "../public/footbongs-and-beerball.mp3";
+import { useEffect } from "react";
 
 function play() {
   var audio = document.getElementById("audioPlayer");
@@ -36,6 +37,7 @@ export default function Home() {
           <div className="navLinks">
             <Link href="/constitution" className="link">Constitution</Link>
             <Link href="/previousYears/2022" className="link">2022 Loser (Trent)</Link>
+            <Link href="/masters" className="link">Masters</Link>
           </div>
         </div>
         <br/>
