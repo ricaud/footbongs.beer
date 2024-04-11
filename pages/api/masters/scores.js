@@ -1,7 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import HTMLParser from "node-html-parser";
 
-
 const tournamentData = {
     Kyle: ["Scottie Scheffler", "Will Zalatoris", "Cameron Smith", "Patrick Reed"],
     Brendan: ["Jon Rahm", "Sahith Theegala", "Collin Morikawa", "Corey Conners"],
@@ -17,6 +16,31 @@ export default function handler(req, res) {
 
     let data = {};
     console.log("fetching...");
+    const https = require('https');
+
+    const options = {
+      hostname: 'espn.com',
+      port: 443,
+      path: '/golf/leaderboard',
+      method: 'GET',
+    };
+    
+    const req = https.request(options, (res) => {
+      let data = '';
+    
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+    
+      res.on('end', () => {
+        console.log(data);
+      });
+    });
+    
+    req.end();
+
+
+
     fetch("https://www.espn.com/golf/leaderboard")
       .then((res) => res.text())
       .then((response) => {
