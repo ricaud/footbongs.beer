@@ -25,19 +25,19 @@ export default function handler(req, res) {
       method: 'GET',
     };
     
-    const req = https.request(options, (res) => {
+    const request = https.request(options, (response) => {
       let data = '';
     
-      res.on('data', (chunk) => {
+      response.on('data', (chunk) => {
         data += chunk;
       });
     
-      res.on('end', () => {
+      response.on('end', () => {
         console.log(data);
       });
     });
     
-    req.end();
+    request.end();
 
 
 
