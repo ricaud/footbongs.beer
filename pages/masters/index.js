@@ -30,10 +30,10 @@ export default function Home() {
   const fetchMastersData = () => {
     let data = {};
     console.log("fetching...");
-    fetch("https://www.espn.com/golf/leaderboard")
-      .then((res) => res.text())
+    fetch("https://cxfg1rr54k.execute-api.us-east-1.amazonaws.com/prod/getMastersData")
+      .then((res) => res.json())
       .then((response) => {
-        let root = HTMLParser.parse(response);
+        let root = HTMLParser.parse(response.html);
         let table = root.querySelector(
           "#fittPageContainer > div:nth-child(3) > div > div > section:nth-child(3) > div > div > div > div.Button--group > div.competitors > div > div > div > div.Table__Scroller > table > tbody"
         );
@@ -118,7 +118,7 @@ export default function Home() {
     return (
       <Box>
         {players.map((playerName) => {
-          const playerData = data[getPlayerName(playerName)];
+          const playerData = data[playerName];
           return (
             <Grid container key={playerName}>
               <Grid item xs={8}>
@@ -137,21 +137,9 @@ export default function Home() {
   const getTotalScore = (friend) => {
     let score = 0;
     for (const player of tournamentData[friend]) {
-      score += data[getPlayerName(player)]?.score;
+      score += data[player]?.score;
     }
     return score;
-  };
-
-  const getPlayerName = (playerName) => {
-    if (isDesktopView) {
-      return playerName;
-    } else {
-      const list = playerName.split(" ");
-      const firstName = list[0];
-      const lastName = list.slice(1).join(" ");
-      const mobileName = firstName[0] + ".  " + lastName;
-      return mobileName;
-    }
   };
 
   return (
