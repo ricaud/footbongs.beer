@@ -30,6 +30,7 @@ export default function Home() {
   const fetchMastersData = () => {
     let data = {};
     console.log("fetching...");
+
     fetch("/api/masters/scores")
       .then((res) => res.text())
       .then((response) => {
@@ -93,7 +94,7 @@ export default function Home() {
     return (
       <Box>
         {players.map((playerName) => {
-          const playerData = data[getPlayerName(playerName)];
+          const playerData = data[playerName];
           return (
             <Grid container key={playerName}>
               <Grid item xs={8}>
@@ -112,21 +113,9 @@ export default function Home() {
   const getTotalScore = (friend) => {
     let score = 0;
     for (const player of tournamentData[friend]) {
-      score += data[getPlayerName(player)]?.score;
+      score += data[player]?.score;
     }
     return score;
-  };
-
-  const getPlayerName = (playerName) => {
-    if (isDesktopView) {
-      return playerName;
-    } else {
-      const list = playerName.split(" ");
-      const firstName = list[0];
-      const lastName = list.slice(1).join(" ");
-      const mobileName = firstName[0] + ".  " + lastName;
-      return mobileName;
-    }
   };
 
   return (
