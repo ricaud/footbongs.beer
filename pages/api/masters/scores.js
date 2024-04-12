@@ -15,20 +15,22 @@ export default async function handler(req, res) {
             "#fittPageContainer > div:nth-child(3) > div > div > section:nth-child(3) > div > div > div > div.Button--group > div.competitors > div > div > div > div.Table__Scroller > table > tbody"
           );
           for (const player of table.childNodes) {
-            const position = player.childNodes[1].text;
-            const name = player.childNodes[2].text;
-            const score = parseInt(getPlayerScore(player.childNodes[3].text));
-            const scoreString = player.childNodes[3].text;
-            const todayScore = parseInt(getPlayerScore(player.childNodes[4].text));
-            const thru = player.childNodes[5].text;
-            data.push({
-              position: position,
-              name: name,
-              score: score,
-              scoreString: scoreString,
-              todayScore: todayScore,
-              thru: thru,
-            });
+            if (player.childNodes.length >= 6) {
+              const position = player.childNodes[1].text;
+              const name = player.childNodes[3].text;
+              const score = parseInt(getPlayerScore(player.childNodes[4].text));
+              const scoreString = player.childNodes[4].text;
+              const todayScore = parseInt(getPlayerScore(player.childNodes[5].text));
+              const thru = player.childNodes[6].text;
+              data.push({
+                position: position,
+                name: name,
+                score: score,
+                scoreString: scoreString,
+                todayScore: todayScore,
+                thru: thru,
+              });
+            }
           } 
   
           res.status(200).end(JSON.stringify(data))
