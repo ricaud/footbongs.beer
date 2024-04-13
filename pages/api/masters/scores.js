@@ -18,10 +18,12 @@ export default async function handler(req, res) {
             if (player.childNodes.length >= 6) {
               const position = player.childNodes[1].text;
               const name = player.childNodes[3].text;
-              const score = parseInt(getPlayerScore(player.childNodes[4].text));
-              const scoreString = player.childNodes[4].text;
+              const totalScore = parseInt(player.childNodes[11].text)
+              const score = parseInt(getPlayerScore(player.childNodes[4].text, totalScore));
+              const scoreString = getScoreString(player.childNodes[4].text, score);
               const todayScore = parseInt(getPlayerScore(player.childNodes[5].text));
               const thru = player.childNodes[6].text;
+              
               data.push({
                 position: position,
                 name: name,
@@ -39,12 +41,22 @@ export default async function handler(req, res) {
     })
 }
 
-const getPlayerScore = (scoreString) => {
+const getPlayerScore = (scoreString, totalScore) => {
     if (scoreString === "-") {
       return 0;
     } else if (scoreString === "E") {
       return 0;
+    } else if (scoreString === "CUT"){
+      return totalScore - 144; //144 = par after 2 rounds
     } else {
       return scoreString;
     }
   };
+
+  const getScoreString = (scoreString, score) => {
+    if (scoreString === "CUT") {
+      return scoreString +" (+" + score + ")";
+    } else {
+      return scoreString;
+    }
+  }
