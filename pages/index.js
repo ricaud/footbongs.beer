@@ -37,7 +37,7 @@ export default function Home() {
           <div className="navLinks">
             <Link href="/constitution" className="link">Constitution</Link>
             <Link href="/previousYears/2022" className="link">2022 Loser (Trent)</Link>
-            <Link href="/masters" className="link">Masters</Link>
+            <Link href="/golf" className="link">Golf</Link>
           </div>
         </div>
         <br/>

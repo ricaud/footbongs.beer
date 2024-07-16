@@ -1,0 +1,13 @@
+{
+    "url": "https://www.espn.com/golf/leaderboard/_/tournamentId/401580344",
+    "friends": {
+        "Kyle": ["Scottie Scheffler", "Will Zalatoris", "Cameron Smith", "Patrick Reed"],
+        "Brendan": ["Jon Rahm", "Sahith Theegala", "Collin Morikawa", "Corey Conners"],
+        "David": ["Rory McIlroy", "Hideki Matsuyama", "Justin Thomas", "Shane Lowry"],
+        "Trent": ["Viktor Hovland", "Matt Fitzpatrick", "Jake Knapp", "Tyrrell Hatton"],
+        "George": ["Xander Schauffele", "Max Homa", "Cameron Young", "Tony Finau"],
+        "Mike": ["Jordan Spieth", "Patrick Cantlay", "Jason Day", "Sam Burns"],
+        "Josh": ["Brooks Koepka", "Joaquín Niemann", "Min Woo Lee", "Bryson DeChambeau"],
+        "Colby": ["Ludvig Åberg", "Wyndham Clark", "Brian Harman", "Dustin Johnson"]
+    }
+}
