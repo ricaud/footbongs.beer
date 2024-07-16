@@ -9,8 +9,8 @@ const TEE_TIME_HEADER = "TEE TIME";
 const TOTAL_SCORE_HEADER = "TOT";
 const SCORE_HEADER = "SCORE";
 const POSITION_HEADER = "POS";
-const TODAY_SCORE_HEADER = "TODAY"; // TODO: Check this header
-const THRU_HEADER = "THRU";         // TODO: Check this header
+const TODAY_SCORE_HEADER = "TODAY";
+const THRU_HEADER = "THRU";
 
 export default async function handler(req, res) {
   const tournamentData = await getTournamentData(req.query.id);

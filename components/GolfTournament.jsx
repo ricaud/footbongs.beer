@@ -106,6 +106,9 @@ export default function GolfTournament(props) {
       <div className="link">
         <Link href="/">Home</Link>
       </div>
+      <div className="link">
+        <Link href="/golf">Golf Home</Link>
+      </div>
     </Box>
   );
 }
