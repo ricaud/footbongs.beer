@@ -4,7 +4,6 @@ import fetch from "node-fetch";
 import {promises as fs} from "fs";
 import path from "path";
 
-
 const PLAYER_HEADER = "PLAYER";
 const TEE_TIME_HEADER = "TEE TIME";
 const TOTAL_SCORE_HEADER = "TOT";
