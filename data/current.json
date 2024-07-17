@@ -1,11 +1,11 @@
 {
     "url": "https://www.espn.com/golf/leaderboard",
     "friends": {
-        "Trent": ["Scottie Scheffler", "Robert MacIntyre", "Tony Finau"],
-        "Kyle": ["Rory McIlroy", "Brooks Koepka", "Shane Lowry"],
-        "David": ["Xander Schauffele", "Viktor Hovland", "Akshay Bhatia"],
-        "Josh": ["Collin Morikawa", "Tommy Fleetwood", "Patrick Cantlay"],
-        "George": ["Bryson DeChambeau", "Tyrrell Hatton", "Cameron Smith", "Max Homa"],
+        "Trent": ["Scottie Scheffler", "Robert MacIntyre", "Tony Finau", "Jordan Spieth", "Aaron Rai"],
+        "Kyle": ["Rory McIlroy", "Brooks Koepka", "Shane Lowry", "Joaquín Niemann", "Sungjae Im"],
+        "David": ["Xander Schauffele", "Viktor Hovland", "Akshay Bhatia", "Wyndham Clark", "Louis Oosthuizen"],
+        "Josh": ["Collin Morikawa", "Tommy Fleetwood", "Patrick Cantlay", "Hideki Matsuyama", "Adam Scott"],
+        "George": ["Bryson DeChambeau", "Tyrrell Hatton", "Cameron Smith", "Max Homa", "Cameron Young"],
         "Colby": ["Ludvig Åberg", "Jon Rahm", "Sahith Theegala", "Tom Kim"]
     }
 }
