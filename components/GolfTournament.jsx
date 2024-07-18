@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Box, Chip, Grid, Typography, useMediaQuery } from "@mui/material";
+import { Box, Chip, Divider, Grid, Typography, useMediaQuery } from "@mui/material";
 import Link from "next/link";
 import PropTypes from "prop-types";
 
@@ -45,14 +45,14 @@ export default function GolfTournament(props) {
                 padding: "10px",
               }}
             >
-              <Grid item xs={12}>
+              <Grid item xs={10}>
                 <Typography variant="h5">{teamName}</Typography>
               </Grid>
-              <Grid item xs={9}>
-                {renderPlayers(players)}
+              <Grid item xs={2}>
+                <Chip label={getTotalScore(teamName)} sx={{ background: "white", float: "right" }} />
               </Grid>
-              <Grid item xs={3}>
-                <Chip label={getTotalScore(teamName)} sx={{ background: "white" }} />
+              <Grid item xs={12} sx={{ marginTop: "10px" }}>
+                {renderPlayers(players)}
               </Grid>
             </Grid>
           );
@@ -73,21 +73,35 @@ export default function GolfTournament(props) {
 
   const renderPlayers = (players) => {
     return (
-      <Box>
+      <Grid container>
+        <Grid item xs={7} sx={{ fontWeight: "bold" }}>
+          PLAYERS
+        </Grid>
+        <Grid item xs={2.5} sx={{ fontWeight: "bold" }}>
+          SCORE
+        </Grid>
+        <Grid item xs={2.5} sx={{ fontWeight: "bold" }}>
+          THRU
+        </Grid>
         {players.map((playerName) => {
           const playerData = data.players[playerName];
           return (
-            <Grid container key={playerName}>
-              <Grid item xs={8}>
+            <>
+              <Grid item xs={7}>
                 {playerData?.name}
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={2.5}>
                 {playerData?.scoreString ? playerData?.scoreString : playerData?.teeTime}
               </Grid>
-            </Grid>
+              {playerData?.scoreString && (
+                <Grid item xs={2.5}>
+                  {playerData?.thru}
+                </Grid>
+              )}
+            </>
           );
         })}
-      </Box>
+      </Grid>
     );
   };
 
