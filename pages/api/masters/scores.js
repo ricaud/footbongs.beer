@@ -39,23 +39,27 @@ export default async function handler(req, res) {
 
         if (tableBody) {
           for (const playerRow of tableBody.childNodes) {
-            if (playerRow) {
-              const playerName = getCellValue(tableHeaderColumnList, playerRow, PLAYER_HEADER);
-              if (playerName) {
-                const playerData = {};
-                playerData.name = playerName;
-                playerData.teeTime = getCellValue(tableHeaderColumnList, playerRow, TEE_TIME_HEADER);
-                playerData.totalScoreString = getCellValue(tableHeaderColumnList, playerRow, TOTAL_SCORE_HEADER);
-                playerData.totalScore = playerData.totalScoreString ? parseInt(playerData.totalScoreString) : null;
-                const scoreString = getCellValue(tableHeaderColumnList, playerRow, SCORE_HEADER);
-                playerData.score = scoreString ? parseInt(getPlayerScore(par, scoreString, playerData.totalScore)) : null;
-                playerData.scoreString = getScoreString(scoreString, playerData.score);
-                playerData.position = getCellValue(tableHeaderColumnList, playerRow, POSITION_HEADER);
-                playerData.todayScore = getCellValue(tableHeaderColumnList, playerRow, TODAY_SCORE_HEADER);
-                playerData.thru = getCellValue(tableHeaderColumnList, playerRow, THRU_HEADER);
-
-                data.players[playerName] = playerData;
+            try {
+              if (playerRow) {
+                const playerName = getCellValue(tableHeaderColumnList, playerRow, PLAYER_HEADER);
+                if (playerName) {
+                  const playerData = {};
+                  playerData.name = playerName;
+                  playerData.teeTime = getCellValue(tableHeaderColumnList, playerRow, TEE_TIME_HEADER);
+                  playerData.totalScoreString = getCellValue(tableHeaderColumnList, playerRow, TOTAL_SCORE_HEADER);
+                  playerData.totalScore = playerData.totalScoreString ? parseInt(playerData.totalScoreString) : null;
+                  const scoreString = getCellValue(tableHeaderColumnList, playerRow, SCORE_HEADER);
+                  playerData.score = scoreString ? parseInt(getPlayerScore(par, scoreString, playerData.totalScore)) : null;
+                  playerData.scoreString = getScoreString(scoreString, playerData.score);
+                  playerData.position = getCellValue(tableHeaderColumnList, playerRow, POSITION_HEADER);
+                  playerData.todayScore = getCellValue(tableHeaderColumnList, playerRow, TODAY_SCORE_HEADER);
+                  playerData.thru = getCellValue(tableHeaderColumnList, playerRow, THRU_HEADER);
+  
+                  data.players[playerName] = playerData;
+                }
               }
+            } catch (e) {
+              console.error(e)
             }
           }
         }
@@ -72,8 +76,10 @@ export default async function handler(req, res) {
 const getCellValue = (tableHeaderColumnList, row, headerName) => {
   if (tableHeaderColumnList.includes(headerName)) {
     const columnIdx = tableHeaderColumnList.findIndex(header => header === headerName);
-    const cellValue = row.childNodes[columnIdx].text;
-    return cellValue;
+    if (row.childNodes.length - 1 >= columnIdx) {
+      const cellValue = row.childNodes[columnIdx].text;
+      return cellValue;
+    }
   }
   return null;
 }
