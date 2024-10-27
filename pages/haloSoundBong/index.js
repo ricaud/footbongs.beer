@@ -76,9 +76,9 @@ export default function SoundGrid({ soundFiles }) {
           No sound files detected in database
         </p>
       )}
-      <div className="link">
+      <div className="center">
           <Link href="/">Home</Link>
-          <a href="/halo-bong-audio.zip" className={styles.halolink} download="halo-bong-audio">Download Sounds</a>
+          <Link href="/halo-bong-audio.zip" className={styles.halolink} download="halo-bong-audio">Download Sounds</Link>
       </div>
     </div>
   );
