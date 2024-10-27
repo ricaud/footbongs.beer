@@ -50,7 +50,7 @@ export default function SoundGrid({ soundFiles }) {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>UNSC Sound Interface</h1>
+      <h1 className={styles.title}>UNSC Bong Board</h1>
       
       {lastPlayed && (
         <p className={styles.status}>
