@@ -77,7 +77,7 @@ export default function SoundGrid({ soundFiles }) {
         </p>
       )}
       <div className="link">
-          <Link href="/" className="link">Home</Link>"
+          <Link href="/">Home</Link>
           <a href="/halo-bong-audio.zip" className={styles.halolink} download="halo-bong-audio">Download Sounds</a>
       </div>
     </div>
