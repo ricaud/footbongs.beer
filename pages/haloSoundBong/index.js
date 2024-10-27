@@ -1,62 +1,85 @@
-import { useEffect } from 'react';
+import React, { useState } from 'react';
+import Link from "next/link";
+import styles from './HaloUI.module.css';
 
-const soundFiles = [
-  './halo-sounds/bongtacular.mp3',
-'./halo-sounds/Bongtrocity.mp3',
-'./halo-sounds/bing-bong.mp3',
-'./halo-sounds/bonging-riot-2.mp3',
-'./halo-sounds/bonging-riot.mp3',
-'./halo-sounds/capture-the-bong.mp3',
-'./halo-sounds/play-bong.mp3',
-'./halo-sounds/Bongamanjaro.mp3',
-'./halo-sounds/bonging-spree-2.mp3',
-'./halo-sounds/bongpocalypse.mp3',
-'./halo-sounds/bongtastrophy.mp3',
-'./halo-sounds/tripple-bong.mp3',
-'./halo-sounds/bong-armed.mp3',
-'./halo-sounds/bonging-spree-3.mp3',
-'./halo-sounds/bonging-frenzy.mp3',
-'./halo-sounds/bong-stolen.mp3',
-'./halo-sounds/over-bong.mp3',
-'./halo-sounds/bongionare.mp3',
-'./halo-sounds/bonging-spree-1.mp3',
-'./halo-sounds/double-bong.mp3',
-'./halo-sounds/sunday-bonger.mp3'
-];
+export async function getStaticProps() {
+  try {
+    const path = require('path');
+    const fs = require('fs/promises');
+    
+    const soundsDirectory = path.join(process.cwd(), 'public/halo-sounds');
+    const fileNames = await fs.readdir(soundsDirectory);
+    const soundFiles = fileNames
+      .filter(file => file.toLowerCase().endsWith('.mp3'))
+      .map(file => ({
+        name: file.replace('.mp3', ''),
+        path: `/halo-sounds/${file}`
+      }));
 
-const Home = () => {
-  useEffect(() => {
-    // Register service worker for PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
-    }
-  }, []);
+    return {
+      props: {
+        soundFiles
+      }
+    };
+  } catch (error) {
+    console.error('Error reading sound directory:', error);
+    return {
+      props: {
+        soundFiles: []
+      }
+    };
+  }
+}
 
-  const playSound = (src) => {
-    const audio = new Audio(src);
+export default function SoundGrid({ soundFiles }) {
+  const [lastPlayed, setLastPlayed] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const playSound = (soundPath, soundName) => {
+    if (isPlaying) return;
+    setIsPlaying(true);
+    const audio = new Audio(soundPath);
+    
+    audio.onended = () => {
+      setIsPlaying(false);
+    };
+
     audio.play();
+    setLastPlayed(soundName);
   };
 
   return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
-      <h1>Soundboard</h1>
-      <div>
-        {soundFiles.map((sound, index) => (
+    <div className={styles.container}>
+      <h1 className={styles.title}>UNSC Sound Interface</h1>
+      
+      {lastPlayed && (
+        <p className={styles.status}>
+          Last played: {lastPlayed}
+        </p>
+      )}
+
+      <div className={styles.grid}>
+        {soundFiles.map(({ name, path }) => (
           <button
-            key={index}
-            onClick={() => playSound(sound)}
-            style={{
-              margin: '10px',
-              padding: '10px 20px',
-              fontSize: '16px',
-            }}
+            key={path}
+            onClick={() => playSound(path, name)}
+            disabled={isPlaying}
+            className={`${styles.button} ${lastPlayed === name ? styles.playing : ''}`}
           >
-            Sound {index + 1}
+            {name.split('-').join(' ')}
           </button>
         ))}
       </div>
+
+      {soundFiles.length === 0 && (
+        <p className={styles.status}>
+          No sound files detected in database
+        </p>
+      )}
+      <div className="link">
+          <Link href="/" className="link">Home</Link>"
+          <a href="/halo-bong-audio.zip" className={styles.halolink} download="halo-bong-audio">Download Sounds</a>
+      </div>
     </div>
   );
-};
-
-export default Home;
+}

@@ -38,6 +38,7 @@ export default function Home() {
             <Link href="/constitution" className="link">Constitution</Link>
             <Link href="/previousYears/2022" className="link">2022 Loser (Trent)</Link>
             <Link href="/golf" className="link">Golf</Link>
+            <Link href="/haloSoundBong" className="link">Halo Soundboard</Link>
           </div>
         </div>
         <br/>
