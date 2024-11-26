@@ -9,6 +9,7 @@ export default function Constitution() {
     "The crime of accumulating the lowest fantasy points in a given week warrants a film submission to the chat starring yourself bonging a beer by 24 hours after the final game of the week at the latest.",
     "If you find yourself committed to a bong and fail to fulfill the transaction by the given due date, you will be gracefully gifted an additional 24 hours to complete your transaction with an interest rate of one additional bong per 24 hours.",
     "Any dispute that cannot be objectively settled via the above rules will be resolved via a unanimous vote in the chat.",
+    "If you bring up another league you're involved in, the penalty is a beer bong, Example: \"Damn, I played Tony Romo in my other league and he got hella points, I should have played him in our league.\""
   ];
 
   return (
