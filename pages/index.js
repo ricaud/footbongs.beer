@@ -46,7 +46,7 @@ export default function Home() {
               Pause
             </button>
           </div>
-          <h1 className="tab blink intro">FootBongs and Beerball</h1>
+          <h1 className="blink intro center">FootBongs and Beerball</h1>
           <div className="navLinks center">
             <div>
               <Link href="/" className="link">
@@ -87,8 +87,6 @@ export default function Home() {
               src={loserTitle}
               alt="your 2022 league loser"
               className={"image"}
-              width={500}
-              height={100}
             />
           </div>
           <div className="image-containers center imageText">
@@ -96,7 +94,6 @@ export default function Home() {
               src={loserSubTitle}
               alt="two time lozer!!"
               className={"image"}
-              width={200}
             />
           </div>
           <div className="image-container center imagePic rotate">
@@ -104,7 +101,8 @@ export default function Home() {
               src={loser}
               alt="a picture of the league loser"
               className={"image"}
-              width={500}
+              layout="fill"
+              objectFit="cover"
             />
           </div>
           <div className="image-container center imageText">
@@ -112,47 +110,46 @@ export default function Home() {
               src={loserName}
               alt="glitter text that says the losers name"
               className={"image"}
-              width={400}
             />
           </div>
         </div>
 
-        <div class="snowflakes" aria-hidden="true">
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+        <div className="snowflakes" aria-hidden="true">
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
-          <div class="snowflake">
-            <div class="inner">🌭</div>
+          <div className="snowflake">
+            <div className="inner">🌭</div>
           </div>
         </div>
       </main>

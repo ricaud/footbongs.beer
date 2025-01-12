@@ -13,10 +13,10 @@ body,
 main {
     -webkit-font-smoothing: antialiased;
     font-family: "Comic Sans MS", sans-serif;
-    height: 100vh;
+    height: 90vh;
     margin: 0px;
-    /*background-image: url("https://i.imgur.com/Ot0YekQ.gif");*/
     background-image: url("https://i.imgur.com/mq0xpXs.gif");
+    width: 100;
 }
 
 h1,
@@ -31,6 +31,7 @@ a {
     margin: 0;
     min-height: 100vh;
     padding: 0;
+    width: 100%;
 }
 
 .audioPlayer {
@@ -45,6 +46,7 @@ a {
 
 .header {
     display: flex;
+    display: -webkit-flex;
     flex-direction: column;
 }
 
@@ -52,6 +54,7 @@ a {
     flex: 2;
     max-height: 80%;
     display: flex;
+    display: -webkit-flex;
     flex-direction: column;
 }
 
@@ -68,7 +71,7 @@ a {
 
 .imagePic {
     flex: 1;
-    max-height: 400px !important;
+    max-height: 600px !important;
 }
 
 .image {
@@ -79,6 +82,7 @@ a {
 
 .center {
     text-align: center;
+    -webkit-align-items: center;
 }
 
 .intro {
@@ -108,6 +112,7 @@ a {
 .rotate {
     animation: rotation 5s infinite linear;
     z-index: 0;
+    overflow: hidden;
 }
 
 @keyframes rotation {
@@ -199,10 +204,30 @@ a {
 }
 
 @media screen and (max-width: 700px) {
+    .main {
+        height: 90vh;
+    }
+    .image {
+        width: 100%;
+    }
+    .top {
+        width: fill;
+        width: 100vw;
+    }
     .content {
         display: flex;
         flex-direction: column;
         height: 100vh;
+    }
+
+    .header {
+        align-items: center;
+        width: 100vw;
+    }
+
+    .navLinks {
+        flex-direction: column;
+        width: 100%;
     }
 
     .imageText {
