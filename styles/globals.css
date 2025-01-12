@@ -113,6 +113,8 @@ a {
     animation: rotation 5s infinite linear;
     z-index: 0;
     overflow: hidden;
+    border-style: solid;
+    border-color: blue;
 }
 
 @keyframes rotation {

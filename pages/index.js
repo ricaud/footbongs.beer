@@ -96,7 +96,7 @@ export default function Home() {
               className={"image"}
             />
           </div>
-          <div className="image-container center imagePic">
+          <div className="image-container center imagePic rotate">
             <Image
               src={loser}
               alt="a picture of the league loser"
