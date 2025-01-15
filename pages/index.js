@@ -97,16 +97,13 @@ export default function Home() {
             />
           </div>
           <div className="image-container center imagePic">
-            <div className="rotate">
-              {" "}
-              <Image
-                src={loser}
-                alt="a picture of the league loser"
-                className={"image"}
-                layout="fill"
-                objectFit="cover"
-              />
-            </div>
+            <Image
+              src={loser}
+              alt="a picture of the league loser"
+              className={"image"}
+              layout="fill"
+              objectFit="cover"
+            />
           </div>
           <div className="image-container center imageText">
             <Image
