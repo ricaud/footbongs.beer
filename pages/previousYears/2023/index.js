@@ -36,6 +36,14 @@ export default function Home() {
           src={footbongsAndBeerBallAnthem}
           autoPlay
         ></audio>
+        <div className="center audioControls">
+          <button class="play" onClick={play}>
+            Play
+          </button>
+          <button class="pause" onClick={pause}>
+            Pause
+          </button>
+        </div>
         <div className="header center">
           <h1 className="tab blink intro">FootBongs and Beerball</h1>
           <div className="navLinks">
@@ -82,14 +90,6 @@ export default function Home() {
               className={"image"}
             />
           </div>
-        </div>
-        <div className="center audioControls">
-          <button class="play" onClick={play}>
-            Play
-          </button>
-          <button class="pause" onClick={pause}>
-            Pause
-          </button>
         </div>
       </main>
     </>
