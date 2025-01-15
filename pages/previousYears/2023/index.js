@@ -57,7 +57,7 @@ export default function Home() {
           </div>
         </div>
         <br />
-        <div className="content center">
+        <div className="content-2023 center">
           <div className="image-continaer center imageText">
             <Image
               src={loserTitle}
