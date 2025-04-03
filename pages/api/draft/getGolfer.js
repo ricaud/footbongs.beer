@@ -6,13 +6,13 @@ const sql = postgres(process.env.DATABASE_URL,  { ssl: 'verify-full' });
 export default async function handler(req, res) {
     console.log(req.query)
 
-    //get all players
+    //get all golfers
     if(!req.query.tournament && !req.query.friend) {
         const rows = await sql`SELECT * FROM masters2025players`;
         res.status(200).json(rows);
     }
 
-    //get players active in a certain tournament
+    //get golfers active in a certain tournament
     if(req.query.tournament && !req.query.friend) {
         const rows = await sql`
         SELECT 
@@ -25,13 +25,13 @@ export default async function handler(req, res) {
                 )
             ) AS "golfers"
         FROM draftlog dl
-        JOIN masters2025players p ON p.name = dl.player
+        JOIN masters2025players p ON p.name = dl.golfer
         WHERE tournament=${req.query.tournament} GROUP BY dl.tournament`
 
         res.status(200).json(rows[0]);
     }
 
-    //get players owned by a certain freind in a tounament
+    //get golfers owned by a certain freind in a tounament
     if(req.query.tournament && req.query.friend){
         console.log("here")
 
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
             dl.drafter, 
             JSON_AGG(p.*) AS "golfers"
         FROM draftlog dl
-        JOIN masters2025players p ON p.name = dl.player
+        JOIN masters2025players p ON p.name = dl.golfer
         WHERE tournament=${req.query.tournament} AND drafter=${req.query.friend}
         GROUP BY dl.tournament, dl.drafter`
 
