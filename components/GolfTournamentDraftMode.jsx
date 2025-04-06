@@ -398,7 +398,8 @@ export default function GolfTournament(props) {
     if (whosTurn === activeFriend) {
       return "It's YOUR turn!";
     } else {
-      return `It's ${whosTurn}'s turn! You are ${getNumberOfPicksAway()} picks away!`;
+      const numPicksAway = getNumberOfPicksAway();
+      return `It's ${whosTurn}'s turn! You are ${numPicksAway} pick${numPicksAway > 1 ? "s" : ""} away!`;
     }
   };
 
