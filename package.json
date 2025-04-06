@@ -11,10 +11,12 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.17.1",
     "@mui/material": "^5.15.15",
     "@next/font": "13.0.7",
     "eslint": "8.29.0",
     "eslint-config-next": "13.0.7",
+    "flexsearch": "0.6.32",
     "next": "13.0.7",
     "node-fetch": "^3.3.2",
     "node-html-parser": "^6.1.13",
