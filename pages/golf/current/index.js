@@ -4,7 +4,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useEffect, useState } from "react";
 import GolfTournament from "../../../components/GolfTournament";
 import GolfTournamentDraftMode from "../../../components/GolfTournamentDraftMode";
-import theme from "../theme";
+import theme from "../../../styles/theme";
 
 export default function Masters() {
   const [isLoading, setIsLoading] = useState(true);
