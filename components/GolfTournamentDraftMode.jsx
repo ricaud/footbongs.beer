@@ -8,6 +8,7 @@ import {
   Alert,
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -26,23 +27,30 @@ import Link from "next/link";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { initializeSearchIndex, searchPlayers } from "../util/searchPlayers";
-// import SlideUpTransition from "./fundamentals/SlideUpTransition";
-
-const MAX_PLAYER_PICKS = 6;
 
 export default function GolfTournament(props) {
   const isDesktopView = useMediaQuery("(min-width:1024px)");
   const [data, setData] = useState(null);
+  const [draftLog, setDraftLog] = useState([]);
   const [searchedPlayers, setSearchedPlayers] = useState(null);
   const [activeFriend, setActiveFriend] = useState(null);
   const [whosTurn, setWhosTurn] = useState(null);
   const [isPickHistoryExpanded, setIsPickHistoryExpanded] = useState(false);
   const [isDraftComplete, setIsDraftComplete] = useState(false);
   const [isWhosTurnOpen, setIsWhosTurnOpen] = useState(true);
+  const [isLastPickAlertOpen, setIsLastPickAlertOpen] = useState(true);
   const [currentlySelectedPlayer, setCurrentlySelectedPlayer] = useState(null);
+  const [isPlayerPickConfirmLoading, setIsPlayerPickConfirmLoading] = useState(false);
+  const [playerPickConfirmError, setPlayerPickConfirmError] = useState("");
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     fetchTournamentData(props.id);
+    fetchDraftLog(props.id);
+    setInterval(() => {
+      refreshTournamentData(props.id);
+      fetchDraftLog(props.id);
+    }, 5000);
   }, []);
 
   useEffect(() => {
@@ -51,132 +59,86 @@ export default function GolfTournament(props) {
     }
   }, [data]);
 
-  const mock = async () => {
-    return JSON.stringify({
-      friends: {
-        Josh: [
-          {
-            name: "Aaron Rai",
-            avatar: "aaron_rai.png",
-          },
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
-        Brendan: [
-          {
-            name: "Akshay Bhatia",
-            avatar: "akshay_bhatia.png",
-          },
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
-        // Trent: [
-        //   {
-        //     name: "Brooks Koepka",
-        //     avatar: "brooks_koepka.png",
-        //   },
-        //   null,
-        //   null,
-        //   null,
-        //   null,
-        //   null,
-        // ],
-        // David: [
-        //   {
-        //     name: "Cameron Smith",
-        //     avatar: "cameron_smith.png",
-        //   },
-        //   null,
-        //   null,
-        //   null,
-        //   null,
-        //   null,
-        // ],
-        George: [null, null, null, null, null, null],
-        // Mike: [null, null, null, null, null, null],
-        // Kyle: [null, null, null, null, null, null],
-        // Colby: [null, null, null, null, null, null],
-      },
-      players: [
-        {
-          name: "Aaron Rai",
-          avatar: "aaron_rai.png",
-        },
-        {
-          name: "Akshay Bhatia",
-          avatar: "akshay_bhatia.png",
-        },
-        {
-          name: "Brooks Koepka",
-          avatar: "brooks_koepka.png",
-        },
-        {
-          name: "Cameron Smith",
-          avatar: "cameron_smith.png",
-        },
-        {
-          name: "Fred Couples",
-          avatar: "fred_couples.png",
-        },
-        {
-          name: "Jon Rahm",
-          avatar: "jon_rahm.png",
-        },
-        {
-          name: "Scottie Scheffler",
-          avatar: "scottie_scheffler.png",
-        },
-      ],
-    });
-  };
+  useEffect(() => {
+    setIsLastPickAlertOpen(true);
+  }, [draftLog]);
 
   const fetchTournamentData = (id) => {
-    // fetch(`/api/masters/scores?id=${id}`)
-    //   .then((res) => res.text())
-    mock().then((response) => {
-      let scores = JSON.parse(response);
-      setData(scores);
-      initializeSearchIndex(scores.players);
-      setSearchedPlayers(scores.players);
-      const player = window.localStorage.getItem("activeFriend");
-      if (player) {
-        setActiveFriend(player);
-      }
-    });
+    setSearchText("");
+    fetch(`/api/draft/getState?tournament=${id}`)
+      .then((res) => res.text())
+      .then((response) => {
+        let draftState = JSON.parse(response);
+        setData(draftState);
+        initializeSearchIndex(draftState.players);
+        setSearchedPlayers(draftState.players);
+        const player = window.localStorage.getItem("activeFriend");
+        if (player) {
+          setActiveFriend(player);
+        }
+      });
+  };
+
+  const refreshTournamentData = (id) => {
+    // console.log("refreshTournamentData");
+    fetch(`/api/draft/getState?tournament=${id}`)
+      .then((res) => res.text())
+      .then((response) => {
+        let draftState = JSON.parse(response);
+        setData(draftState);
+      });
+  };
+
+  const fetchDraftLog = (id) => {
+    fetch(`/api/draft/draftLog?tournament=${id}`)
+      .then((res) => res.text())
+      .then((response) => {
+        let draftLog = JSON.parse(response);
+        setDraftLog(draftLog);
+      });
+  };
+
+  const postDraftGolfer = (tournamentId, drafter, golfer) => {
+    setIsPlayerPickConfirmLoading(true);
+    fetch(`/api/draft/draftGolfer`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        tournament: tournamentId,
+        drafter: drafter,
+        golfer: golfer,
+      }),
+    })
+      .then((res) => res.text())
+      .then((response) => {
+        // console.log(response);
+        const payload = JSON.parse(response);
+        if (payload[0].id) {
+          // Success response
+          setIsPlayerPickConfirmLoading(false);
+          setIsWhosTurnOpen(true);
+          setCurrentlySelectedPlayer(null);
+          fetchTournamentData(props.id);
+          fetchDraftLog(props.id);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        setPlayerPickConfirmError("UH OH, STINKY");
+      });
   };
 
   const applySearch = (searchedPlayers) => {
     setSearchedPlayers(searchedPlayers);
   };
 
-  const handleSearchTextChange = (event) => {
-    searchPlayers(event.target.value, applySearch);
-  };
-
-  const selectPlayer = (selectedPlayer) => {
-    let newData = { ...data };
-    let rosterIdx = 0;
-    for (const player of data.friends[activeFriend]) {
-      if (!player) {
-        newData.friends[activeFriend][rosterIdx] = selectedPlayer;
-        setData(newData);
-        // TODO: is this where a backend data call will be made?
-        return;
-      }
-      rosterIdx += 1;
-    }
-  };
-
   const runDraft = () => {
     if (getIsDraftComplete()) return;
 
-    const maxPlayers = getCurrentMaxPlayers();
+    const maxPicks = getCurrentMaxPicks();
     const totalPicks = getTotalPickCount();
     const roundNumber = Math.floor(totalPicks / Object.keys(data.friends).length);
     const friends = Object.keys(data.friends);
@@ -184,35 +146,37 @@ export default function GolfTournament(props) {
 
     for (const friend of draftOrder) {
       const pickCount = getPickCount(friend);
-      if (maxPlayers === 0 || pickCount < maxPlayers) {
+      if (maxPicks === 0 || pickCount < maxPicks) {
         setWhosTurn(friend);
         return friend;
       }
     }
+    // If we get here then it's the first person in the draftOrder's turn
+    setWhosTurn(draftOrder[0]);
+    return draftOrder[0];
   };
 
   const getIsDraftComplete = () => {
     for (const friend of Object.keys(data.friends)) {
       let pickCount = getPickCount(friend);
-      if (pickCount !== MAX_PLAYER_PICKS) {
+      if (pickCount !== data.teamSize) {
         setIsDraftComplete(false);
         return false;
       }
     }
     setIsDraftComplete(true);
-    // TODO: update payload with isDraftMode = false
     return true;
   };
 
-  const getCurrentMaxPlayers = () => {
-    let currentMaxPlayers = 0;
+  const getCurrentMaxPicks = () => {
+    let currentMaxPicks = 0;
     for (const friend of Object.keys(data.friends)) {
       let pickCount = getPickCount(friend);
-      if (pickCount > currentMaxPlayers) {
-        currentMaxPlayers = pickCount;
+      if (pickCount > currentMaxPicks) {
+        currentMaxPicks = pickCount;
       }
     }
-    return currentMaxPlayers;
+    return currentMaxPicks;
   };
 
   const getTotalPickCount = () => {
@@ -233,18 +197,6 @@ export default function GolfTournament(props) {
     return pickCount;
   };
 
-  const getPickHistory = () => {
-    let pickHistory = [];
-    for (const friend of Object.keys(data.friends)) {
-      for (const player of data.friends[friend]) {
-        if (player) {
-          pickHistory.push(`${friend} picked ${player.name}`);
-        }
-      }
-    }
-    return pickHistory;
-  };
-
   const buildTournamentDataSortedList = () => {
     let sorted = [];
     for (const friend of Object.keys(data.friends)) {
@@ -257,13 +209,65 @@ export default function GolfTournament(props) {
 
   const isPlayerAlreadyPicked = (player) => {
     for (const friend of Object.keys(data.friends)) {
-      for (const currPlayer of data.friends[friend]) {
-        if (currPlayer && currPlayer.name === player.name) {
+      for (const currPlayerName of data.friends[friend]) {
+        if (currPlayerName && currPlayerName === player.name) {
           return true;
         }
       }
     }
     return false;
+  };
+
+  const getWhoTurnAlertColor = () => {
+    if (whosTurn === activeFriend) {
+      return "secondary.red";
+    } else {
+      return "primary.dark";
+    }
+  };
+
+  const getNumberOfPicksAway = () => {
+    const friends = Object.keys(data.friends);
+    const totalPlayers = friends.length;
+    const totalPicks = getTotalPickCount();
+
+    const roundNumber = Math.floor(totalPicks / totalPlayers);
+    const draftOrder = roundNumber % 2 === 0 ? friends : [...friends].reverse();
+
+    // Find the current position in the draft
+    const nextPickIndex = totalPicks % totalPlayers;
+    // Determine how far away the active player is from that next pick
+    for (let i = 0; i < draftOrder.length; i++) {
+      if (draftOrder[(nextPickIndex + i) % totalPlayers] === activeFriend) {
+        return i;
+      }
+    }
+
+    // fallback
+    return Infinity;
+  };
+
+  const getWhosTurnText = () => {
+    if (whosTurn === activeFriend) {
+      return "It's YOUR turn!";
+    } else {
+      const numPicksAway = getNumberOfPicksAway();
+      return `It's ${whosTurn}'s turn! You are ${numPicksAway} pick${numPicksAway > 1 ? "s" : ""} away!`;
+    }
+  };
+
+  const scrollToPlayerList = () => {
+    const playerListTitleEl = document.getElementById("player-list-title");
+    const rect = playerListTitleEl.getBoundingClientRect();
+    const absoluteY = rect.top + window.scrollY;
+
+    // Timeout gives iOS time to settle keyboard shift
+    setTimeout(() => {
+      window.scrollTo({
+        top: absoluteY,
+        behavior: "smooth",
+      });
+    }, 300); // tweak as needed
   };
 
   const handlePickHistoryExpand = () => {
@@ -279,14 +283,35 @@ export default function GolfTournament(props) {
   };
 
   const handlePlayerSelectConfirmation = (player) => {
-    selectPlayer(player);
-    setIsWhosTurnOpen(true);
-    setCurrentlySelectedPlayer(null);
+    postDraftGolfer(props.id, activeFriend, player.name);
   };
 
   const handleSelectFriend = (teamName) => {
     setActiveFriend(teamName);
     window.localStorage.setItem("activeFriend", teamName);
+  };
+
+  const handleWhosTurnClosed = () => {
+    setIsWhosTurnOpen(false);
+  };
+
+  const handleLastPickAlertClosed = () => {
+    setIsLastPickAlertOpen(false);
+  };
+
+  const handleChangeTeamClicked = () => {
+    location.reload();
+    window.localStorage.clear();
+  };
+
+  const handleSearchTextFocus = () => {
+    scrollToPlayerList();
+  };
+
+  const handleSearchTextChange = (event) => {
+    setSearchText(event.target.value);
+    searchPlayers(event.target.value, applySearch);
+    scrollToPlayerList();
   };
 
   const renderTournamentDraftMode = () => {
@@ -326,7 +351,8 @@ export default function GolfTournament(props) {
               {renderPlayerList()}
             </Grid>
 
-            {renderWhosTurn()}
+            {renderLastPickAlert()}
+            {renderWhosTurnAlert()}
             {renderAreYouSureDialog()}
           </Grid>
         );
@@ -365,80 +391,43 @@ export default function GolfTournament(props) {
     }
   };
 
-  const getWhoTurnAlertColor = () => {
-    if (whosTurn === activeFriend) {
-      return "error";
-    } else {
-      return "success";
+  const renderLastPickAlert = () => {
+    if (draftLog.length === 0) {
+      return;
     }
-  };
-
-  const getNumberOfPicksAway = () => {
-    const friends = Object.keys(data.friends);
-    const totalPlayers = friends.length;
-    const totalPicks = getTotalPickCount();
-
-    const roundNumber = Math.floor(totalPicks / totalPlayers);
-    const draftOrder = roundNumber % 2 === 0 ? friends : [...friends].reverse();
-
-    // Find the current position in the draft
-    const nextPickIndex = totalPicks % totalPlayers;
-    // Determine how far away the active player is from that next pick
-    for (let i = 0; i < draftOrder.length; i++) {
-      if (draftOrder[(nextPickIndex + i) % totalPlayers] === activeFriend) {
-        return i;
-      }
-    }
-
-    // fallback
-    return Infinity;
-  };
-
-  const getWhosTurnText = () => {
-    if (whosTurn === activeFriend) {
-      return "It's YOUR turn!";
-    } else {
-      const numPicksAway = getNumberOfPicksAway();
-      return `It's ${whosTurn}'s turn! You are ${numPicksAway} pick${numPicksAway > 1 ? "s" : ""} away!`;
-    }
-  };
-
-  const handleWhosTurnClosed = () => {
-    setIsWhosTurnOpen(false);
-  };
-
-  const handleChangeTeamClicked = () => {
-    location.reload();
-    window.localStorage.clear();
-  };
-
-  const handleSearchTextFocus = () => {
-    const playerListTitleEl = document.getElementById("player-list-title");
-    scrollToInput(playerListTitleEl);
-  };
-
-  const scrollToInput = (inputElement, offset = 80) => {
-    // TODO: test if this actually works on mobile.. seems to be decent on ios sim
-    setTimeout(() => {
-      const rect = inputElement.getBoundingClientRect();
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const targetY = rect.top + scrollTop - offset;
-
-      window.scrollTo({
-        top: targetY,
-        behavior: "smooth",
-      });
-    }, 300); // Delay gives time for keyboard/layout shifts
-  };
-
-  const renderWhosTurn = () => {
+    const lastPick = draftLog[draftLog.length - 1];
     return (
-      <Snackbar open={isWhosTurnOpen}>
+      <Snackbar open={isLastPickAlertOpen} sx={{ display: "flex", justifyContent: "center" }}>
         <Alert
           icon={false}
           variant="filled"
-          color={getWhoTurnAlertColor()}
-          sx={{ marginBottom: "10px", width: "100%" }}
+          //   color="secondary.main"
+          sx={{
+            marginBottom: "65px",
+            width: "350px",
+            maxWidth: "100vw",
+            backgroundColor: "secondary.main",
+            color: "primary.black",
+          }}
+          action={
+            <IconButton size="small" aria-label="close" onClick={handleLastPickAlertClosed}>
+              <CloseIcon fontSize="small" sx={{ color: "primary.black" }} />
+            </IconButton>
+          }
+        >
+          {`Last Pick: ${lastPick.drafter} picked ${lastPick.golfer}`}
+        </Alert>
+      </Snackbar>
+    );
+  };
+
+  const renderWhosTurnAlert = () => {
+    return (
+      <Snackbar open={isWhosTurnOpen} sx={{ display: "flex", justifyContent: "center" }}>
+        <Alert
+          icon={false}
+          variant="filled"
+          sx={{ width: "350px", maxWidth: "100vw", marginBottom: "10px", backgroundColor: getWhoTurnAlertColor() }}
           action={
             <IconButton size="small" aria-label="close" onClick={handleWhosTurnClosed}>
               <CloseIcon fontSize="small" sx={{ color: "primary.white" }} />
@@ -459,10 +448,11 @@ export default function GolfTournament(props) {
             {activeFriend}'s Roster
           </Typography>
         </Grid>
-        {data.friends[friend].map((player, idx) => {
-          if (player) {
+        {data.friends[friend].map((playerName, idx) => {
+          if (playerName) {
+            const player = data.players.find((p) => p.name === playerName);
             return (
-              <Grid key={player.name} item xs={4}>
+              <Grid key={playerName} item xs={4}>
                 {renderPlayerImage(player)}
               </Grid>
             );
@@ -487,21 +477,35 @@ export default function GolfTournament(props) {
   };
 
   const renderPickHistory = () => {
+    const picksPerRound = Object.keys(data.friends).length; // one pick per drafter per round
     return (
       <Accordion
         expanded={isPickHistoryExpanded}
         onChange={handlePickHistoryExpand}
-        sx={{ backgroundColor: "primary.main", marginTop: "10px", maxWidth: "450px", margin: "auto" }}
+        sx={{
+          backgroundColor: "primary.dark",
+          marginTop: "10px",
+          maxWidth: "450px",
+          margin: "auto",
+        }}
       >
         <AccordionSummary expandIcon={<ExpandMoreIcon color="secondary" />}>
           <Typography>Pick History</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {getPickHistory().map((pickHistoryLine) => {
+          {draftLog.map((logLine, index) => {
+            const isNewRound = index % picksPerRound === 0;
+            const roundNumber = Math.floor(index / picksPerRound) + 1;
+
             return (
-              <Typography key={pickHistoryLine} sx={{ textAlign: "left" }}>
-                {pickHistoryLine}
-              </Typography>
+              <div key={logLine.id}>
+                {isNewRound && (
+                  <Typography sx={{ fontWeight: "bold", marginTop: index === 0 ? 0 : 2 }}>
+                    Round {roundNumber}
+                  </Typography>
+                )}
+                <Typography sx={{ textAlign: "left" }}>{`- ${logLine.drafter} picked ${logLine.golfer}`}</Typography>
+              </div>
             );
           })}
         </AccordionDetails>
@@ -512,15 +516,16 @@ export default function GolfTournament(props) {
   const renderPlayerList = () => {
     return (
       <Grid container sx={{ margin: "auto" }}>
-        <Grid xs={12}>
+        <Grid item xs={12}>
           <Typography variant="h6" sx={{ color: "secondary.main", margin: "10px" }} id="player-list-title">
             Player List
           </Typography>
         </Grid>
-        <Grid xs={12}>
+        <Grid item xs={12}>
           <TextField
+            value={searchText}
             onChange={(event) => handleSearchTextChange(event)}
-            onFocus={(event) => handleSearchTextFocus(event)}
+            onFocus={() => handleSearchTextFocus()}
             label="Search"
             variant="outlined"
             color="secondary"
@@ -574,7 +579,7 @@ export default function GolfTournament(props) {
     return (
       <Box sx={{ width: "100%", maxWidth: 200, mx: "auto" }}>
         <Image
-          src={`/golf/ghibli_headshots/${player.avatar}`}
+          src={player.image_url ? player.image_url : `/golf/ghibli_headshots/unknown.png`}
           alt={player.name}
           width={200}
           height={200}
@@ -638,18 +643,27 @@ export default function GolfTournament(props) {
               Are you sure you want to pick {currentlySelectedPlayer.name}?
               <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <Image
-                  src={`/golf/ghibli_headshots/${currentlySelectedPlayer.avatar}`}
+                  src={
+                    currentlySelectedPlayer.image_url
+                      ? currentlySelectedPlayer.image_url
+                      : `/golf/ghibli_headshots/unknown.png`
+                  }
                   alt={currentlySelectedPlayer.name}
                   width={200}
                   height={200}
                   style={{ borderRadius: "5px", marginTop: "10px" }}
                 />
               </Box>
+              {playerPickConfirmError !== "" && (
+                <Alert variant="filled" severity="error" sx={{ margin: "10px" }}>
+                  {playerPickConfirmError}
+                </Alert>
+              )}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button
-              onClick={handlePlayerSelectCancel}
+              onClick={isPlayerPickConfirmLoading ? undefined : handlePlayerSelectCancel}
               variant="outlined"
               color="primary"
               size="large"
@@ -658,15 +672,19 @@ export default function GolfTournament(props) {
               No
             </Button>
             <Button
-              onClick={() => {
-                handlePlayerSelectConfirmation(currentlySelectedPlayer);
-              }}
+              onClick={
+                isPlayerPickConfirmLoading
+                  ? undefined
+                  : () => {
+                      handlePlayerSelectConfirmation(currentlySelectedPlayer);
+                    }
+              }
               variant="contained"
               color="primary"
               size="large"
               sx={{ width: "100px" }}
             >
-              Yes
+              {isPlayerPickConfirmLoading ? <CircularProgress size="26px" color="secondary" /> : "Yes"}
             </Button>
           </DialogActions>
         </Dialog>
@@ -703,6 +721,7 @@ export default function GolfTournament(props) {
           </div>
         </>
       )}
+      <Box height="100px"></Box>
     </Box>
   );
 }

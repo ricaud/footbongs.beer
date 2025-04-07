@@ -11,17 +11,37 @@ export default function Masters() {
   const [isDraftMode, setIsDraftMode] = useState(false);
 
   useEffect(() => {
-    fetchTournament("masters_2025").then((response) => {
-      setIsDraftMode(response.isDraftMode);
-      setIsLoading(false);
-    });
+    fetchTournamentData("masters2025");
   }, []);
 
-  const fetchTournament = async (tournamentId) => {
-    // Replace this with a real API call
-    return {
-      isDraftMode: true,
-    };
+  const fetchTournamentData = (id) => {
+    fetch(`/api/draft/getState?tournament=${id}`)
+      .then((res) => res.text())
+      .then((response) => {
+        let draftState = JSON.parse(response);
+        setIsDraftMode(!getIsDraftComplete(draftState));
+        setIsLoading(false);
+      });
+  };
+
+  const getIsDraftComplete = (data) => {
+    for (const friend of Object.keys(data.friends)) {
+      let pickCount = getPickCount(data, friend);
+      if (pickCount !== data.teamSize) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const getPickCount = (data, friend) => {
+    let pickCount = 0;
+    for (const player of data.friends[friend]) {
+      if (player) {
+        pickCount += 1;
+      }
+    }
+    return pickCount;
   };
 
   const renderGolfTournament = () => {
@@ -43,9 +63,9 @@ export default function Masters() {
     }
 
     return isDraftMode ? (
-      <GolfTournamentDraftMode id="current" title="Masters 2025" />
+      <GolfTournamentDraftMode id="masters2025" title="Masters 2025" />
     ) : (
-      <GolfTournament id="current" title="Masters 2025" />
+      <GolfTournament id="masters2025" title="Masters 2025" />
     );
   };
 

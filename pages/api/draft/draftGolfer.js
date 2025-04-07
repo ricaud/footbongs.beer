@@ -14,11 +14,12 @@ export default async function handler(req, res) {
     console.log(body)
 
     // is it this drafters turn?
-    const draftingPlayer = await sql`SELECT friends[currentDrafterIndex+1] as "name" FROM draftState WHERE tournament=${body.tournament}`
-    if(draftingPlayer[0].name !== body.drafter) {
-        res.status(400).json({ error: `Current drafter is ${draftingPlayer[0].name} not ${body.drafter}` });
-        return;
-    }
+    // STINKY ORDER *hawk tuah*
+    // const draftingPlayer = await sql`SELECT friends[currentDrafterIndex+1] as "name" FROM draftState WHERE tournament=${body.tournament}`
+    // if(draftingPlayer[0].name !== body.drafter) {
+    //     res.status(400).json({ error: `Current drafter is ${draftingPlayer[0].name} not ${body.drafter}` });
+    //     return;
+    // }
 
     // does this golfer exist!?
     const golfer = await sql`SELECT * FROM masters2025players WHERE name=${body.golfer}`
@@ -40,6 +41,7 @@ export default async function handler(req, res) {
     console.log(insertDraftLogResult)
     
     // update the draft state
+    // TODO: figure out how to change this so the pick order is correct
     const updateDraftStateResult = await sql`UPDATE draftState SET currentDrafterIndex=mod(currentDrafterIndex+1, array_length(friends, 1)) WHERE tournament=${body.tournament} RETURNING *, friends[currentDrafterIndex+1]`
     res.status(200).json(updateDraftStateResult);
 
