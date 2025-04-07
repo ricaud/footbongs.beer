@@ -52,6 +52,7 @@ export const getState = async (tournamentId) => {
   const players = await sql`
     SELECT
         name,
+        last_name,
         countrycode,
         amateur,
         first_masters,

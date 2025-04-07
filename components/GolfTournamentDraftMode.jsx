@@ -591,7 +591,7 @@ export default function GolfTournament(props) {
         </Grid>
 
         {searchedPlayers
-          .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) => a.last_name.localeCompare(b.last_name))
           .map((player) => {
             const isPicked = isPlayerAlreadyPicked(player);
             return (
