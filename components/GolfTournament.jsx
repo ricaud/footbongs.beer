@@ -26,7 +26,7 @@ export default function GolfTournament(props) {
 
   const renderTournament = () => {
     return (
-      <Box sx={{ margin: "auto", width: "100vw" }}>
+      <Box sx={{ margin: "auto" }}>
         {buildTournamentDataSortedList().map((teamName) => {
           const players = data.friends[teamName];
 
@@ -39,7 +39,7 @@ export default function GolfTournament(props) {
                 marginBottom: "10px",
                 alignItems: "center",
                 width: "500px",
-                maxWidth: "100vw",
+                maxWidth: "100%",
                 background: "#FDE200",
                 color: "#000",
                 borderRadius: "5px",
@@ -118,8 +118,8 @@ export default function GolfTournament(props) {
   };
 
   return (
-    <Box sx={{ width: "100%", height: "100%", padding: "20px 20px 20px 20px", background: "#1D4832" }}>
-      <Typography variant="h3">{props.title} Leaderboard</Typography>
+    <Box sx={{ width: "100%", minWidth: "100vw", height: "100%", minHeight: "100vh", padding: "20px 20px 20px 20px", background: "#1D4832" }}>
+      <Typography variant="h4" sx={{color: "secondary.main"}}>{props.title} Leaderboard</Typography>
       {data && renderTournament()}
       <div className="link">
         <Link href="/">Home</Link>

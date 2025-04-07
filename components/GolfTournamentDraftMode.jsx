@@ -33,16 +33,23 @@ export default function GolfTournament(props) {
   const [data, setData] = useState(null);
   const [draftLog, setDraftLog] = useState([]);
   const [searchedPlayers, setSearchedPlayers] = useState(null);
-  const [activeFriend, setActiveFriend] = useState(null);
+  const [activeDrafter, setActiveDrafter] = useState(null);
   const [whosTurn, setWhosTurn] = useState(null);
   const [isPickHistoryExpanded, setIsPickHistoryExpanded] = useState(false);
   const [isDraftComplete, setIsDraftComplete] = useState(false);
   const [isWhosTurnAlertOpen, setIsWhosTurnAlertOpen] = useState(true);
   const [isLastPickAlertOpen, setIsLastPickAlertOpen] = useState(true);
-  const [currentlySelectedPlayer, setCurrentlySelectedPlayer] = useState(null);
   const [isPlayerPickConfirmLoading, setIsPlayerPickConfirmLoading] = useState(false);
   const [playerPickConfirmError, setPlayerPickConfirmError] = useState("");
   const [searchText, setSearchText] = useState("");
+
+  // Drafter select - Retard Protection Dialog state
+  const [currentlySelectedDrafter, setCurrentlySelectedDrafter] = useState(null);
+  const [retardProtectionText, setRetardProtectionText] = useState("");
+  const [retardConfirmedError, setRetardConfirmedError] = useState("");
+
+  // Golfer select - Are you sure? Dialog state
+  const [currentlySelectedGolfer, setCurrentlySelectedGolfer] = useState(null);
 
   const prevDraftLogRef = useRef();
 
@@ -79,9 +86,9 @@ export default function GolfTournament(props) {
         setData(draftState);
         initializeSearchIndex(draftState.players);
         setSearchedPlayers(draftState.players);
-        const player = window.localStorage.getItem("activeFriend");
+        const player = window.localStorage.getItem("activeDrafter");
         if (player) {
-          setActiveFriend(player);
+          setActiveDrafter(player);
         }
       });
   };
@@ -125,7 +132,7 @@ export default function GolfTournament(props) {
           // Success response
           setIsPlayerPickConfirmLoading(false);
           setIsWhosTurnAlertOpen(true);
-          setCurrentlySelectedPlayer(null);
+          setCurrentlySelectedGolfer(null);
           fetchTournamentData(props.id);
           fetchDraftLog(props.id);
           window.scrollTo({ top: 0, behavior: "smooth" });
@@ -225,7 +232,7 @@ export default function GolfTournament(props) {
   };
 
   const getWhoTurnAlertColor = () => {
-    if (whosTurn === activeFriend) {
+    if (whosTurn === activeDrafter) {
       return "secondary.red";
     } else {
       return "primary.dark";
@@ -252,16 +259,16 @@ export default function GolfTournament(props) {
 
     // Now find when the active friend is next in line
     for (let i = 0; i < pickSequence.length; i++) {
-      if (pickSequence[i] === activeFriend) {
+      if (pickSequence[i] === activeDrafter) {
         return i;
       }
     }
 
-    return Infinity; // should not happen unless the activeFriend is missing
+    return Infinity; // should not happen unless the activeDrafter is missing
   };
 
   const getWhosTurnText = () => {
-    if (whosTurn === activeFriend) {
+    if (whosTurn === activeDrafter) {
       return "It's YOUR turn!";
     } else {
       const numPicksAway = getNumberOfPicksAway();
@@ -288,20 +295,33 @@ export default function GolfTournament(props) {
   };
 
   const handlePlayerClicked = (player) => {
-    setCurrentlySelectedPlayer(player);
+    setCurrentlySelectedGolfer(player);
   };
 
   const handlePlayerSelectCancel = () => {
-    setCurrentlySelectedPlayer(null);
+    setCurrentlySelectedGolfer(null);
   };
 
   const handlePlayerSelectConfirmation = (player) => {
-    postDraftGolfer(props.id, activeFriend, player.name);
+    postDraftGolfer(props.id, activeDrafter, player.name);
   };
 
-  const handleSelectFriend = (teamName) => {
-    setActiveFriend(teamName);
-    window.localStorage.setItem("activeFriend", teamName);
+  const handleSelectDrafter = (teamName) => {
+    setCurrentlySelectedDrafter(teamName);
+  };
+
+  const handleSelectDrafterConfirm = (teamName) => {
+    if (teamName.toUpperCase() !== retardProtectionText) {
+      setRetardConfirmedError("Don't make me say it!!!");
+    } else {
+      setActiveDrafter(teamName);
+      window.localStorage.setItem("activeDrafter", teamName);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleSelectDrafterCancel = () => {
+    setCurrentlySelectedDrafter(null);
   };
 
   const handleWhosTurnClosed = () => {
@@ -351,11 +371,11 @@ export default function GolfTournament(props) {
         </>
       );
     } else {
-      if (activeFriend) {
+      if (activeDrafter) {
         return (
           <Grid container>
             <Grid item xs={12} md={6}>
-              {renderPlayerRoster(activeFriend)}
+              {renderPlayerRoster(activeDrafter)}
             </Grid>
             <Grid item xs={12} md={6}>
               {renderPickHistory()}
@@ -366,7 +386,7 @@ export default function GolfTournament(props) {
 
             {renderLastPickAlert()}
             {renderWhosTurnAlert()}
-            {renderAreYouSureDialog()}
+            {renderGolferSelectAreYouSureDialog()}
           </Grid>
         );
       } else {
@@ -390,7 +410,7 @@ export default function GolfTournament(props) {
                     padding: "10px",
                     maxWidth: "400px",
                   }}
-                  onClick={() => handleSelectFriend(teamName)}
+                  onClick={() => handleSelectDrafter(teamName)}
                 >
                   <Typography variant="h5" sx={{ margin: "auto" }}>
                     {teamName}
@@ -398,6 +418,7 @@ export default function GolfTournament(props) {
                 </Grid>
               );
             })}
+            {renderDrafterSelectRetardProtectionDialog()}
           </Box>
         );
       }
@@ -457,7 +478,7 @@ export default function GolfTournament(props) {
       <Grid container sx={{ maxWidth: "450px", margin: "auto" }}>
         <Grid item xs={12}>
           <Typography variant="h5" sx={{ color: "secondary.main" }}>
-            {activeFriend}'s Roster
+            {activeDrafter}'s Roster
           </Typography>
         </Grid>
         {data.friends[friend].map((playerName, idx) => {
@@ -579,7 +600,7 @@ export default function GolfTournament(props) {
                 item
                 xs={6}
                 md={1.5}
-                onClick={() => whosTurn === activeFriend && !isPicked && handlePlayerClicked(player)}
+                onClick={() => whosTurn === activeDrafter && !isPicked && handlePlayerClicked(player)}
               >
                 {renderPlayer(player, isPicked)}
               </Grid>
@@ -639,30 +660,123 @@ export default function GolfTournament(props) {
     );
   };
 
-  const renderAreYouSureDialog = () => {
+  const renderDrafterSelectRetardProtectionDialog = () => {
     return (
-      currentlySelectedPlayer !== null && (
+      currentlySelectedDrafter !== null && (
         <Dialog
-          //   maxWidth="md"
-          open={currentlySelectedPlayer !== null}
+          open={currentlySelectedDrafter !== null}
+          keepMounted
+          aria-labelledby="are-you-sure-retard-title"
+          aria-describedby="are-you-sure-retard-description"
+          PaperProps={{
+            sx: {
+              marginTop: "20px",
+              alignSelf: "flex-start",
+            },
+          }}
+        >
+          <DialogTitle id="are-you-sure-retard-title" sx={{ color: "primary.main" }}>
+            Confirmation
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText component={"div"} id="are-you-sure-retard-description">
+              Are you sure you want to draft as {currentlySelectedDrafter}?
+              <Box sx={{ display: "flex", justifyContent: "center" }}>PROVE IT. Write your name in this box:</Box>
+              <TextField
+                value={retardProtectionText}
+                onChange={(event) => setRetardProtectionText(event.target.value.toUpperCase())}
+                label="YOUR NAME HERE"
+                variant="outlined"
+                color="primary"
+                sx={{
+                  marginTop: "10px",
+                  width: "100%",
+                  maxWidth: "350px",
+                  "& .MuiInputBase-input": {
+                    color: "primary.main", // text color
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: "primary.main", // label color
+                  },
+                  "& .Mui-focused": {
+                    color: "primary.main", // label color
+                  },
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "primary.main", // default border
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "primary.main", // hover border
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "primary.main", // focused border
+                    },
+                  },
+                }}
+              />
+              {retardConfirmedError !== "" && (
+                <Alert variant="filled" severity="error" sx={{ marginTop: "10px" }}>
+                  {retardConfirmedError}
+                </Alert>
+              )}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleSelectDrafterCancel}
+              variant="outlined"
+              color="primary"
+              size="large"
+              sx={{ width: "100px" }}
+            >
+              No
+            </Button>
+            <Button
+              onClick={() => {
+                handleSelectDrafterConfirm(currentlySelectedDrafter);
+              }}
+              variant="contained"
+              color="primary"
+              size="large"
+              sx={{ width: "100px" }}
+            >
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )
+    );
+  };
+
+  const renderGolferSelectAreYouSureDialog = () => {
+    return (
+      currentlySelectedGolfer !== null && (
+        <Dialog
+          open={currentlySelectedGolfer !== null}
           keepMounted
           aria-labelledby="are-you-sure-title"
           aria-describedby="alert-dialog-slide-description"
+          PaperProps={{
+            sx: {
+              marginTop: "20px",
+              alignSelf: "flex-start",
+            },
+          }}
         >
           <DialogTitle id="are-you-sure-title" sx={{ color: "primary.main" }}>
             Confirmation
           </DialogTitle>
           <DialogContent>
             <DialogContentText component={"div"} id="are-you-sure-description">
-              Are you sure you want to pick {currentlySelectedPlayer.name}?
+              Are you sure you want to pick {currentlySelectedGolfer.name}?
               <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <Image
                   src={
-                    currentlySelectedPlayer.image_url
-                      ? currentlySelectedPlayer.image_url
+                    currentlySelectedGolfer.image_url
+                      ? currentlySelectedGolfer.image_url
                       : `/golf/ghibli_headshots/unknown.png`
                   }
-                  alt={currentlySelectedPlayer.name}
+                  alt={currentlySelectedGolfer.name}
                   width={200}
                   height={200}
                   style={{ borderRadius: "5px", marginTop: "10px" }}
@@ -690,7 +804,7 @@ export default function GolfTournament(props) {
                 isPlayerPickConfirmLoading
                   ? undefined
                   : () => {
-                      handlePlayerSelectConfirmation(currentlySelectedPlayer);
+                      handlePlayerSelectConfirmation(currentlySelectedGolfer);
                     }
               }
               variant="contained"
@@ -717,13 +831,10 @@ export default function GolfTournament(props) {
         textAlign: "center",
       }}
     >
-      {/* <Button variant="contained" onClick={() => setActiveFriend(null)} sx={{ margin: "5px", width: "100%" }}>
-        Back
-      </Button> */}
       {data && renderTournamentDraftMode()}
       {!isDraftComplete && (
         <>
-          {activeFriend && (
+          {activeDrafter && (
             <div className="link">
               <Link href="" onClick={handleChangeTeamClicked}>
                 Change Team
