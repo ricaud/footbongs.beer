@@ -395,7 +395,7 @@ export default function GolfTournament(props) {
             <Typography variant="h4" textAlign="center" sx={{ color: "secondary.main" }}>
               {props.title} Draft
             </Typography>
-            <Typography variant="body1">Click on YOUR name below to get into the draft. Don't be a prick.</Typography>
+            <Typography variant="body1">Click on YOUR name below to get into the draft. Don&apos;t be a prick.</Typography>
             {buildTournamentDataSortedList().map((teamName) => {
               return (
                 <Grid
@@ -478,7 +478,7 @@ export default function GolfTournament(props) {
       <Grid container sx={{ maxWidth: "450px", margin: "auto" }}>
         <Grid item xs={12}>
           <Typography variant="h5" sx={{ color: "secondary.main" }}>
-            {activeDrafter}'s Roster
+            {activeDrafter}&apos;s Roster
           </Typography>
         </Grid>
         {data.friends[friend].map((playerName, idx) => {
