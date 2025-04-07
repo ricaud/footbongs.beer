@@ -276,6 +276,14 @@ export default function GolfTournament(props) {
     }
   };
 
+  const getFontSize = (text) => {
+    if (!isDesktopView) {
+      if (text.length > 20) return "0.7rem";
+      if (text.length > 16) return "0.8rem";
+    }
+    return "1rem";
+  };
+
   const scrollToPlayerList = () => {
     const playerListTitleEl = document.getElementById("player-list-title");
     const rect = playerListTitleEl.getBoundingClientRect();
@@ -395,7 +403,9 @@ export default function GolfTournament(props) {
             <Typography variant="h4" textAlign="center" sx={{ color: "secondary.main" }}>
               {props.title} Draft
             </Typography>
-            <Typography variant="body1">Click on YOUR name below to get into the draft. Don&apos;t be a prick.</Typography>
+            <Typography variant="body1">
+              Click on YOUR name below to get into the draft. Don&apos;t be a prick.
+            </Typography>
             {buildTournamentDataSortedList().map((teamName) => {
               return (
                 <Grid
@@ -633,6 +643,7 @@ export default function GolfTournament(props) {
           borderRadius: "5px",
           margin: "10px",
           backgroundColor: "#E4E9ED",
+          minHeight: "175px",
         }}
       >
         <Grid container>
@@ -648,8 +659,14 @@ export default function GolfTournament(props) {
               variant="body1"
               sx={
                 isPicked
-                  ? { textAlign: "left", marginLeft: "10px", color: "#000", textDecoration: "line-through" }
-                  : { textAlign: "left", marginLeft: "10px", color: "#000" }
+                  ? {
+                      textAlign: "left",
+                      marginLeft: "10px",
+                      color: "#000",
+                      textDecoration: "line-through",
+                      fontSize: getFontSize(player.name),
+                    }
+                  : { textAlign: "left", marginLeft: "10px", color: "#000", fontSize: getFontSize(player.name) }
               }
             >
               {player.name}
