@@ -536,21 +536,25 @@ export default function GolfTournament(props) {
           <Typography>Pick History</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {draftLog.map((logLine, index) => {
-            const isNewRound = index % picksPerRound === 0;
-            const roundNumber = Math.floor(index / picksPerRound) + 1;
+          {draftLog.length === 0
+            ? <Typography>No picks yet</Typography>
+            : draftLog.map((logLine, index) => {
+                const isNewRound = index % picksPerRound === 0;
+                const roundNumber = Math.floor(index / picksPerRound) + 1;
 
-            return (
-              <div key={logLine.id}>
-                {isNewRound && (
-                  <Typography sx={{ fontWeight: "bold", marginTop: index === 0 ? 0 : 2 }}>
-                    Round {roundNumber}
-                  </Typography>
-                )}
-                <Typography sx={{ textAlign: "left" }}>{`- ${logLine.drafter} picked ${logLine.golfer}`}</Typography>
-              </div>
-            );
-          })}
+                return (
+                  <div key={logLine.id}>
+                    {isNewRound && (
+                      <Typography sx={{ fontWeight: "bold", marginTop: index === 0 ? 0 : 2 }}>
+                        Round {roundNumber}
+                      </Typography>
+                    )}
+                    <Typography
+                      sx={{ textAlign: "left" }}
+                    >{`- ${logLine.drafter} picked ${logLine.golfer}`}</Typography>
+                  </div>
+                );
+              })}
         </AccordionDetails>
       </Accordion>
     );
