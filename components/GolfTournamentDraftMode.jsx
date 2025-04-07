@@ -25,7 +25,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { initializeSearchIndex, searchPlayers } from "../util/searchPlayers";
 
 export default function GolfTournament(props) {
@@ -44,6 +44,8 @@ export default function GolfTournament(props) {
   const [playerPickConfirmError, setPlayerPickConfirmError] = useState("");
   const [searchText, setSearchText] = useState("");
 
+  const prevDraftLogRef = useRef();
+
   useEffect(() => {
     fetchTournamentData(props.id);
     fetchDraftLog(props.id);
@@ -60,7 +62,12 @@ export default function GolfTournament(props) {
   }, [data]);
 
   useEffect(() => {
-    setIsLastPickAlertOpen(true);
+    const prevDraftLog = prevDraftLogRef.current;
+    if (prevDraftLog && draftLog.length !== prevDraftLog.length) {
+      setIsLastPickAlertOpen(true);
+    }
+
+    prevDraftLogRef.current = draftLog;
   }, [draftLog]);
 
   const fetchTournamentData = (id) => {
@@ -80,7 +87,6 @@ export default function GolfTournament(props) {
   };
 
   const refreshTournamentData = (id) => {
-    // console.log("refreshTournamentData");
     fetch(`/api/draft/getState?tournament=${id}`)
       .then((res) => res.text())
       .then((response) => {
@@ -401,7 +407,6 @@ export default function GolfTournament(props) {
         <Alert
           icon={false}
           variant="filled"
-          //   color="secondary.main"
           sx={{
             marginBottom: "65px",
             width: "350px",
@@ -557,20 +562,22 @@ export default function GolfTournament(props) {
           />
         </Grid>
 
-        {searchedPlayers.map((player) => {
-          const isPicked = isPlayerAlreadyPicked(player);
-          return (
-            <Grid
-              key={player.name}
-              item
-              xs={6}
-              md={1.5}
-              onClick={() => whosTurn === activeFriend && !isPicked && handlePlayerClicked(player)}
-            >
-              {renderPlayer(player, isPicked)}
-            </Grid>
-          );
-        })}
+        {searchedPlayers
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((player) => {
+            const isPicked = isPlayerAlreadyPicked(player);
+            return (
+              <Grid
+                key={player.name}
+                item
+                xs={6}
+                md={1.5}
+                onClick={() => whosTurn === activeFriend && !isPicked && handlePlayerClicked(player)}
+              >
+                {renderPlayer(player, isPicked)}
+              </Grid>
+            );
+          })}
       </Grid>
     );
   };

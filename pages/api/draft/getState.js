@@ -4,7 +4,8 @@ const sql = postgres(process.env.DATABASE_URL, { ssl: "verify-full" });
 
 // This function can now leverage a shared connection pool
 export default async function handler(req, res) {
-  let draftState = await sql`SELECT scoresUrl as "url",teamsize from draftState WHERE tournament=${req.query.tournament}`;
+  let draftState =
+    await sql`SELECT scoresUrl as "url",teamsize from draftState WHERE tournament=${req.query.tournament}`;
   draftState = draftState[0];
   console.log(draftState);
 
@@ -20,15 +21,15 @@ export default async function handler(req, res) {
   const { result: rawResult } = await sql`
     SELECT jsonb_object_agg(f.drafter, COALESCE(dl.players, '[]')) AS result
     FROM (
-    SELECT UNNEST(ds.friends) AS drafter
-    FROM draftstate ds
-    WHERE ds.tournament = ${req.query.tournament}
+        SELECT UNNEST(ds.friends) AS drafter
+        FROM draftstate ds
+        WHERE ds.tournament = ${req.query.tournament}
     ) f
     LEFT JOIN (
-    SELECT dl.drafter, JSON_AGG(dl.golfer) AS players
-    FROM draftLog dl
-    WHERE dl.tournament = ${req.query.tournament}
-    GROUP BY dl.drafter
+        SELECT dl.drafter, JSON_AGG(dl.golfer ORDER BY dl.id) AS players
+        FROM draftLog dl
+        WHERE dl.tournament = ${req.query.tournament}
+        GROUP BY dl.drafter
     ) dl ON f.drafter = dl.drafter;
     `.then((rows) => rows[0]);
 
@@ -37,7 +38,7 @@ export default async function handler(req, res) {
   for (const drafter of orderedFriends) {
     friends[drafter] = rawResult[drafter] || [];
     while (friends[drafter].length !== draftState.teamsize) {
-        friends[drafter].push(null)
+      friends[drafter].push(null);
     }
   }
   console.log(friends);

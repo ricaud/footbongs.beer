@@ -41,7 +41,6 @@ export default async function handler(req, res) {
     console.log(insertDraftLogResult)
     
     // update the draft state
-    // TODO: figure out how to change this so the pick order is correct
     const updateDraftStateResult = await sql`UPDATE draftState SET currentDrafterIndex=mod(currentDrafterIndex+1, array_length(friends, 1)) WHERE tournament=${body.tournament} RETURNING *, friends[currentDrafterIndex+1]`
     res.status(200).json(updateDraftStateResult);
 
