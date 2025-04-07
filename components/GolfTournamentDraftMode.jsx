@@ -37,7 +37,7 @@ export default function GolfTournament(props) {
   const [whosTurn, setWhosTurn] = useState(null);
   const [isPickHistoryExpanded, setIsPickHistoryExpanded] = useState(false);
   const [isDraftComplete, setIsDraftComplete] = useState(false);
-  const [isWhosTurnOpen, setIsWhosTurnOpen] = useState(true);
+  const [isWhosTurnAlertOpen, setIsWhosTurnAlertOpen] = useState(true);
   const [isLastPickAlertOpen, setIsLastPickAlertOpen] = useState(true);
   const [currentlySelectedPlayer, setCurrentlySelectedPlayer] = useState(null);
   const [isPlayerPickConfirmLoading, setIsPlayerPickConfirmLoading] = useState(false);
@@ -124,7 +124,7 @@ export default function GolfTournament(props) {
         if (payload[0].id) {
           // Success response
           setIsPlayerPickConfirmLoading(false);
-          setIsWhosTurnOpen(true);
+          setIsWhosTurnAlertOpen(true);
           setCurrentlySelectedPlayer(null);
           fetchTournamentData(props.id);
           fetchDraftLog(props.id);
@@ -305,7 +305,7 @@ export default function GolfTournament(props) {
   };
 
   const handleWhosTurnClosed = () => {
-    setIsWhosTurnOpen(false);
+    setIsWhosTurnAlertOpen(false);
   };
 
   const handleLastPickAlertClosed = () => {
@@ -435,7 +435,7 @@ export default function GolfTournament(props) {
 
   const renderWhosTurnAlert = () => {
     return (
-      <Snackbar open={isWhosTurnOpen} sx={{ display: "flex", justifyContent: "center" }}>
+      <Snackbar open={isWhosTurnAlertOpen} sx={{ display: "flex", justifyContent: "center" }}>
         <Alert
           icon={false}
           variant="filled"
