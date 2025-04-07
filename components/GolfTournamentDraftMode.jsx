@@ -237,20 +237,27 @@ export default function GolfTournament(props) {
     const totalPlayers = friends.length;
     const totalPicks = getTotalPickCount();
 
-    const roundNumber = Math.floor(totalPicks / totalPlayers);
-    const draftOrder = roundNumber % 2 === 0 ? friends : [...friends].reverse();
+    // Build the entire upcoming pick sequence until we loop back to the same number of picks as players
+    const lookaheadPicks = totalPlayers * 2; // Look ahead 2 full rounds to be safe
+    const pickSequence = [];
 
-    // Find the current position in the draft
-    const nextPickIndex = totalPicks % totalPlayers;
-    // Determine how far away the active player is from that next pick
-    for (let i = 0; i < draftOrder.length; i++) {
-      if (draftOrder[(nextPickIndex + i) % totalPlayers] === activeFriend) {
+    for (let i = 0; i < lookaheadPicks; i++) {
+      const pickNumber = totalPicks + i;
+      const roundNumber = Math.floor(pickNumber / totalPlayers);
+      const indexInRound = pickNumber % totalPlayers;
+
+      const draftOrder = roundNumber % 2 === 0 ? friends : [...friends].slice().reverse();
+      pickSequence.push(draftOrder[indexInRound]);
+    }
+
+    // Now find when the active friend is next in line
+    for (let i = 0; i < pickSequence.length; i++) {
+      if (pickSequence[i] === activeFriend) {
         return i;
       }
     }
 
-    // fallback
-    return Infinity;
+    return Infinity; // should not happen unless the activeFriend is missing
   };
 
   const getWhosTurnText = () => {

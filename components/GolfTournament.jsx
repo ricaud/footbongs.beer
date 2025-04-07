@@ -36,9 +36,10 @@ export default function GolfTournament(props) {
               key={teamName}
               sx={{
                 textAlign: "left",
-                margin: "10px",
+                marginBottom: "10px",
                 alignItems: "center",
-                width: "95vw",
+                width: "500px",
+                maxWidth: "100vw",
                 background: "#FDE200",
                 color: "#000",
                 borderRadius: "5px",
@@ -109,6 +110,9 @@ export default function GolfTournament(props) {
     let score = 0;
     for (const player of data.friends[friend]) {
       score += data.players[player]?.score;
+    }
+    if (Number.isNaN(score)) {
+      return "?"
     }
     return score;
   };
