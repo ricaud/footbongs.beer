@@ -494,7 +494,7 @@ export default function GolfTournament(props) {
               <Grid key={`Unk${idx}`} item xs={4} sx={{ color: "secondary.main" }}>
                 <Box sx={{ width: "100%", maxWidth: 200, mx: "auto" }}>
                   <Image
-                    src={`/golf/ghibli_headshots/unknown.png`}
+                    src={`https://masters-ghibli-headshots.s3.us-east-1.amazonaws.com/unknown.png`}
                     alt="unpicked"
                     width={100}
                     height={100}
