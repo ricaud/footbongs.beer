@@ -1,8 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import HTMLParser from "node-html-parser";
 import fetch from "node-fetch";
-import {promises as fs} from "fs";
-import path from "path";
+import HTMLParser from "node-html-parser";
+import { getState } from "../draft/getState";
 
 const PLAYER_HEADER = "PLAYER";
 const TEE_TIME_HEADER = "TEE TIME";
@@ -94,18 +93,8 @@ const getPar = (root) => {
 }
 
 const getTournamentData = async (id) => {
-  const dataPath = path.join(process.cwd(), 'data');
-  const files = await fs.readdir(dataPath);
-  const tournamentDataFileList = files.filter(file => file.endsWith(`${id}.json`));
-  let tournamentDataFile = null;
-  if (tournamentDataFileList.length > 0) {
-    tournamentDataFile = tournamentDataFileList[0];
-    const filePath = path.join(dataPath, tournamentDataFile);
-    const fileContents = await fs.readFile(filePath, 'utf8');
-    const jsonData = JSON.parse(fileContents);
-    return jsonData;
-  }
-  throw Error("404"); 
+  const draftState = await getState(id);
+  return draftState;
 }
 
 const getPlayerScore = (par, scoreString, totalScore) => {
