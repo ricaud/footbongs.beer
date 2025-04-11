@@ -2,6 +2,9 @@
 import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
+  typography: {
+    fontFamily: "'DM Serif Text', serif"
+  },
   palette: {
     primary: {
       dark: "#143323", // customize this

@@ -1,5 +1,6 @@
 import '../styles/globals.css'
 import '../styles/constitution.css'
+import '../styles/golf.css'
 import { useEffect } from 'react';
 
 export default function App({ Component, pageProps }) {
