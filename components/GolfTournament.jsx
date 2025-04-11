@@ -62,7 +62,20 @@ export default function GolfTournament(props) {
                       <Box sx={{ display: "flex", alignItems: "center", mr: 1 }}>
                         <Image
                           src="/crown.svg"
-                          alt="crown"
+                          alt="big-weiner"
+                          width={33}
+                          height={24}
+                          style={{
+                            display: "block",
+                          }}
+                        />
+                      </Box>
+                    )}
+                    {idx === buildTournamentDataSortedList().length - 1 && (
+                      <Box sx={{ display: "flex", alignItems: "center", mr: 1 }}>
+                        <Image
+                          src="/poop.svg"
+                          alt="poopy-stink"
                           width={33}
                           height={24}
                           style={{
