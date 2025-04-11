@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   const tournamentData = await getTournamentData(req.query.id);
   return new Promise((resolve) => {
     let data = {
-      players: {}
+      players: Object.fromEntries(tournamentData.players.map((player) => [player.name, player])),
     };
     fetch(tournamentData.url)
       .then((httpResponse) => httpResponse.text())
@@ -48,17 +48,19 @@ export default async function handler(req, res) {
                   playerData.totalScoreString = getCellValue(tableHeaderColumnList, playerRow, TOTAL_SCORE_HEADER);
                   playerData.totalScore = playerData.totalScoreString ? parseInt(playerData.totalScoreString) : null;
                   const scoreString = getCellValue(tableHeaderColumnList, playerRow, SCORE_HEADER);
-                  playerData.score = scoreString ? parseInt(getPlayerScore(par, scoreString, playerData.totalScore)) : null;
+                  playerData.score = scoreString
+                    ? parseInt(getPlayerScore(par, scoreString, playerData.totalScore))
+                    : null;
                   playerData.scoreString = getScoreString(scoreString, playerData.score);
                   playerData.position = getCellValue(tableHeaderColumnList, playerRow, POSITION_HEADER);
                   playerData.todayScore = getCellValue(tableHeaderColumnList, playerRow, TODAY_SCORE_HEADER);
                   playerData.thru = getCellValue(tableHeaderColumnList, playerRow, THRU_HEADER);
-  
-                  data.players[playerName] = playerData;
+
+                  data.players[playerName] = { ...data.players[playerName], ...playerData };
                 }
               }
             } catch (e) {
-              console.error(e)
+              console.error(e);
             }
           }
         }
@@ -74,36 +76,36 @@ export default async function handler(req, res) {
 
 const getCellValue = (tableHeaderColumnList, row, headerName) => {
   if (tableHeaderColumnList.includes(headerName)) {
-    const columnIdx = tableHeaderColumnList.findIndex(header => header === headerName);
+    const columnIdx = tableHeaderColumnList.findIndex((header) => header === headerName);
     if (row.childNodes.length - 1 >= columnIdx) {
       const cellValue = row.childNodes[columnIdx].text;
       return cellValue;
     }
   }
   return null;
-}
+};
 
 const getPar = (root) => {
   const parElement = root.querySelector("span.label");
-  if (parElement && parElement.text.trim() === 'Par') {
+  if (parElement && parElement.text.trim() === "Par") {
     const parValue = parElement.nextSibling.rawText.trim();
     return parseInt(parValue);
   }
   throw Error("Par not found");
-}
+};
 
 const getTournamentData = async (id) => {
   const draftState = await getState(id);
   return draftState;
-}
+};
 
 const getPlayerScore = (par, scoreString, totalScore) => {
   if (scoreString === "-") {
     return 0;
   } else if (scoreString === "E") {
     return 0;
-  } else if (scoreString === "CUT"){
-    return totalScore - (par*2);
+  } else if (scoreString === "CUT") {
+    return totalScore - par * 2;
   } else {
     return scoreString;
   }
@@ -111,8 +113,8 @@ const getPlayerScore = (par, scoreString, totalScore) => {
 
 const getScoreString = (scoreString, score) => {
   if (scoreString === "CUT") {
-    return scoreString +" (+" + score + ")";
+    return scoreString + " (+" + score + ")";
   } else {
     return scoreString;
   }
-}
+};
