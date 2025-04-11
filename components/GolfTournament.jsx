@@ -13,7 +13,6 @@ export default function GolfTournament(props) {
     let timeout;
 
     const poll = async () => {
-      console.log(document.visibilityState)
       if (document.visibilityState === "visible") {
         fetchTournamentData(props.id);
       }
