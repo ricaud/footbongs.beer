@@ -2,13 +2,13 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
-import loserTitle from "../public/2025/2025-LOSER-THIS-GUY-STINKS.gif";
-import loserName from "../public/2025/2025-BROOKS-DA-BIG-RIG-DANAHY.gif";
-import loser from "../public/2025/brooks-x-venom.gif";
+import loserTitle from "../../../public/2024/2024-FB-B-LOOOOOSSSEEERRR.gif";
+import loserSubTitle from "../../../public/2024/TWO-TIME-LOSER.gif";
+import loserName from "../../../public/2024/KYLE-PECOT.gif";
+import loser from "../../../public/2024/kyle-rice-hat.png";
 
-import footbongsAndBeerBallAnthem from "../public/footbongs-and-beerball.mp3";
+import footbongsAndBeerBallAnthem from "../../../public/footbongs-and-beerball.mp3";
 import { useEffect } from "react";
-import styles from "./index.module.css";
 
 function play() {
   var audio = document.getElementById("audioPlayer");
@@ -31,13 +31,13 @@ export default function Home() {
         <title>fOotBoNgS n B3eRbalL</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={`center top ${styles.top} ${styles.homePageMain}`}>
+      <main className="center top">
         <audio
           id="audioPlayer"
           src={footbongsAndBeerBallAnthem}
           autoPlay
         ></audio>
-        <div className={`header center ${styles.header}`}>
+        <div className="header center">
           <div className="center">
             <button className="play" onClick={play}>
               Play
@@ -69,11 +69,6 @@ export default function Home() {
               </Link>
             </div>
             <div>
-              <Link href="/previousYears/2024" className="link">
-                2024 Loser (Kyle)
-              </Link>
-            </div>
-            <div>
               <Link href="/golf" className="link">
                 Golf
               </Link>
@@ -85,36 +80,32 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className={`image-container center imagePic ${styles.imagePic}`}>
-          <br />
-          <Image
-            src={loser}
-            alt="a picture of the league loser"
-            className={`image ${styles.imagePicFill}`}
-            fill
-            style={{ objectFit: "cover" }}
-          />
-        </div>
         <br />
-        <div className={`content center ${styles.content}`}>
-        <br />
-        <br />
-        <br />
-        <br />
-          <div className={`image-container center imageText ${styles.imageText}`}>
+        <div className="content center">
+          <div className="image-container center imageText">
             <Image
               src={loserTitle}
-              alt="your 2025 league loser"
+              alt="your 2022 league loser"
               className={"image"}
             />
           </div>
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <div className={`image-container center imageText ${styles.imageText}`}>
+          <div className="image-containers center imageText">
+            <Image
+              src={loserSubTitle}
+              alt="two time lozer!!"
+              className={"image"}
+            />
+          </div>
+          <div className="image-container center imagePic">
+            <Image
+              src={loser}
+              alt="a picture of the league loser"
+              className={"image"}
+              layout="fill"
+              objectFit="cover"
+            />
+          </div>
+          <div className="image-container center imageText">
             <Image
               src={loserName}
               alt="glitter text that says the losers name"
@@ -125,40 +116,40 @@ export default function Home() {
 
         <div className="snowflakes" aria-hidden="true">
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
           <div className="snowflake">
-            <div className="inner">🍌</div>
+            <div className="inner">🌭</div>
           </div>
         </div>
       </main>

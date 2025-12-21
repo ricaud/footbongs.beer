@@ -1,0 +1,50 @@
+.top {
+    position: relative;
+}
+
+/* Override global background image for this page only */
+.homePageMain {
+    background-image: none !important;
+}
+
+.header {
+    position: relative;
+    z-index: 100;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+}
+
+.imageText {
+    z-index: 2;
+    position: relative;
+}
+
+.imagePic {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    max-height: none !important;
+    min-height: 100vh;
+}
+
+.imagePicFill {
+    object-fit: cover !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    z-index: 0;
+}
+
+@media screen and (max-width: 700px) {
+    .imagePic {
+        min-height: 100vh;
+    }
+}
+

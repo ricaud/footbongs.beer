@@ -8,7 +8,7 @@
     src: url("/fonts/WeThePeople.ttf");
 }
 
-html,
+
 body,
 main {
     -webkit-font-smoothing: antialiased;
@@ -69,23 +69,37 @@ a {
 .image-container {
     flex-grow: 1;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .imageText {
-    flex: 2;
+    flex: 0 0 auto;
     z-index: 1;
     max-height: 100px !important;
+    min-height: 50px;
 }
 
 .imagePic {
     flex: 1;
     max-height: 600px !important;
+    min-height: 300px;
+    position: relative;
+    width: 100%;
 }
 
 .image {
     object-fit: contain;
     position: relative !important;
     max-width: fit-content;
+}
+
+.imagePic-fill {
+    object-fit: cover !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
 }
 
 .center {
@@ -240,10 +254,14 @@ a {
 
     .imageText {
         max-height: 100px !important;
+        min-height: 50px;
     }
 
     .imagePic {
         max-height: 400px !important;
+        min-height: 200px;
+        position: relative;
+        width: 100%;
     }
 
     .intro {
