@@ -16,7 +16,7 @@
     "eslint": "8.29.0",
     "eslint-config-next": "13.0.7",
     "flexsearch": "0.6.32",
-    "next": "^15.2.4",
+    "next": "15.2.8",
     "node-fetch": "^3.3.2",
     "node-html-parser": "^6.1.13",
     "postgres": "^3.4.5",
