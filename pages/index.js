@@ -79,6 +79,11 @@ export default function Home() {
               </Link>
             </div>
             <div>
+              <Link href="/stonks" className="link">
+                Stonks
+              </Link>
+            </div>
+            <div>
               <Link href="/haloSoundBong" className="link">
                 Halo Soundboard
               </Link>
