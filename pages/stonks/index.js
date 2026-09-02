@@ -35,6 +35,25 @@ import {
 import styles from "./stonks.module.css";
 
 const THEME_LABELS = { light: "Light", dark: "Dark", golf: "Golf" };
+const PNL_STORAGE_KEY = "stonks-pnl";
+
+function readPnlUnit() {
+  if (typeof window === "undefined") return "$";
+  try {
+    return window.localStorage.getItem(PNL_STORAGE_KEY) === "%" ? "%" : "$";
+  } catch {
+    return "$";
+  }
+}
+
+function writePnlUnit(unit) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(PNL_STORAGE_KEY, unit);
+  } catch {
+    /* private mode */
+  }
+}
 
 function tone(n) {
   if (n > 0) return styles.up;
@@ -206,6 +225,7 @@ export default function Stonks() {
   const [cooldownLeft, setCooldownLeft] = useState(0);
   const [streamStatus, setStreamStatus] = useState("idle");
   const [liveEnabled, setLiveEnabled] = useState(true);
+  const [pnlUnit, setPnlUnit] = useState("$");
   const liveBuffer = useRef({});
 
   const loadQuotes = useCallback(async () => {
@@ -296,6 +316,7 @@ export default function Stonks() {
 
   useEffect(() => {
     setLiveEnabled(readLiveEnabled());
+    setPnlUnit(readPnlUnit());
   }, []);
 
   useEffect(() => {
@@ -427,6 +448,8 @@ export default function Stonks() {
 
   const pnl = portfolioDollars(ranked);
   const total = portfolioValue(ranked);
+  const costBasis = total - pnl;
+  const pnlPercent = costBasis !== 0 ? pnl / costBasis : 0;
   const coolingDown = cooldownLeft > 0;
   const stream = streamUi(streamStatus);
   const stale =
@@ -450,6 +473,12 @@ export default function Stonks() {
     if (enabled === liveEnabled) return;
     writeLiveEnabled(enabled);
     setLiveEnabled(enabled);
+  }
+
+  function setPnlMode(unit) {
+    if (unit === pnlUnit) return;
+    writePnlUnit(unit);
+    setPnlUnit(unit);
   }
 
   function chooseTheme(next) {
@@ -492,13 +521,45 @@ export default function Stonks() {
           <div className={styles.portfolio}>
             <div
               className={styles.portfolioValue}
-              aria-label={formatPortfolioDelta(total, pnl)}
+              aria-label={formatPortfolioDelta(total, pnl, pnlUnit)}
             >
               <span>{Number.isFinite(total) ? total.toFixed(2) : "—"}</span>
               <span className={tone(pnl)}>
                 {" "}
-                ({formatSignedPlain(pnl)})
+                (
+                {pnlUnit === "%"
+                  ? formatPercent(pnlPercent)
+                  : formatSignedPlain(pnl)}
+                )
               </span>
+            </div>
+            <div
+              className={`${styles.modeSwitch} ${styles.pnlSwitch}`}
+              role="radiogroup"
+              aria-label="P/L unit"
+            >
+              <button
+                type="button"
+                role="radio"
+                aria-checked={pnlUnit === "$"}
+                className={`${styles.modeOpt} ${
+                  pnlUnit === "$" ? styles.modeOn : ""
+                }`}
+                onClick={() => setPnlMode("$")}
+              >
+                $
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={pnlUnit === "%"}
+                className={`${styles.modeOpt} ${
+                  pnlUnit === "%" ? styles.modeOn : ""
+                }`}
+                onClick={() => setPnlMode("%")}
+              >
+                %
+              </button>
             </div>
           </div>
         </header>

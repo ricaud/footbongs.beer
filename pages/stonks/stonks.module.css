@@ -127,6 +127,10 @@
 }
 
 .portfolio {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
   text-align: right;
 }
 
@@ -135,6 +139,13 @@
   font-size: 18px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.root .pnlSwitch .modeOpt {
+  padding: 2px 7px;
+  font-size: 11px;
+  line-height: 1.2;
 }
 
 .root .refreshNote {
