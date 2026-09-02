@@ -1,15 +1,21 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import lots from "../../data/stonks.json";
 import {
+  formatElapsed,
   formatMoney,
   formatPercent,
+  formatPortfolioDelta,
   formatPrice,
+  formatSignedPlain,
+  isQuoteStale,
   nextExpandedId,
   overallPnL,
   portfolioDollars,
+  portfolioValue,
   rankPositions,
+  sliceHistoryFromFill,
   todayPnL,
 } from "../../lib/stonks/math";
 import {
@@ -18,6 +24,14 @@ import {
   readTheme,
   writeStoredTheme,
 } from "../../lib/stonks/theme";
+import {
+  STREAM_URL,
+  mergeLiveQuote,
+  parseStreamMessage,
+  readLiveEnabled,
+  streamUi,
+  writeLiveEnabled,
+} from "../../lib/stonks/yahooStream";
 import styles from "./stonks.module.css";
 
 const THEME_LABELS = { light: "Light", dark: "Dark", golf: "Golf" };
@@ -160,6 +174,8 @@ function mergeRows(quotesByTicker, historyByTicker, now) {
         { t: Date.parse(lots.purchasedAt), close: position.fill },
         { t: now, close: last },
       ];
+    } else {
+      points = sliceHistoryFromFill(points, position.fill);
     }
     return {
       ...position,
@@ -181,11 +197,16 @@ function mergeRows(quotesByTicker, historyByTicker, now) {
 export default function Stonks() {
   const [theme, setTheme] = useState("light");
   const [quotesByTicker, setQuotesByTicker] = useState({});
-  const [fetchedAt, setFetchedAt] = useState(null);
   const [historyByTicker, setHistoryByTicker] = useState({});
   const [detailByTicker, setDetailByTicker] = useState({});
   const [expandedId, setExpandedId] = useState(null);
   const [now, setNow] = useState(() => Date.now());
+  const [clock, setClock] = useState(() => Date.now());
+  const [refreshedAt, setRefreshedAt] = useState(null);
+  const [cooldownLeft, setCooldownLeft] = useState(0);
+  const [streamStatus, setStreamStatus] = useState("idle");
+  const [liveEnabled, setLiveEnabled] = useState(true);
+  const liveBuffer = useRef({});
 
   const loadQuotes = useCallback(async () => {
     try {
@@ -197,11 +218,33 @@ export default function Stonks() {
         next[quote.ticker] = quote;
       }
       setQuotesByTicker(next);
-      setFetchedAt(data.fetchedAt);
       setNow(Date.now());
+      setRefreshedAt(Date.now());
     } catch {
       /* keep last good quotes */
     }
+  }, []);
+
+  const loadHistory = useCallback(async () => {
+    const entries = await Promise.all(
+      lots.positions.map(async (position) => {
+        try {
+          const res = await fetch(
+            `/api/stonks/history?ticker=${position.ticker}&detail=0`
+          );
+          if (!res.ok) return [position.ticker, null];
+          const data = await res.json();
+          return [position.ticker, data.points || []];
+        } catch {
+          return [position.ticker, null];
+        }
+      })
+    );
+    const next = {};
+    for (const [ticker, points] of entries) {
+      if (points?.length) next[ticker] = points;
+    }
+    setHistoryByTicker(next);
   }, []);
 
   useEffect(() => {
@@ -232,51 +275,124 @@ export default function Stonks() {
 
   useEffect(() => {
     loadQuotes();
-    let timer = null;
-    const tick = () => {
-      if (document.visibilityState === "visible") {
-        loadQuotes();
-      }
-    };
-    timer = setInterval(tick, 30000);
-    const onVis = () => {
-      if (document.visibilityState === "visible") loadQuotes();
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => {
-      clearInterval(timer);
-      document.removeEventListener("visibilitychange", onVis);
-    };
   }, [loadQuotes]);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const entries = await Promise.all(
-        lots.positions.map(async (position) => {
-          try {
-            const res = await fetch(
-              `/api/stonks/history?ticker=${position.ticker}&detail=0`
-            );
-            if (!res.ok) return [position.ticker, null];
-            const data = await res.json();
-            return [position.ticker, data.points || []];
-          } catch {
-            return [position.ticker, null];
-          }
-        })
-      );
-      if (cancelled) return;
-      const next = {};
-      for (const [ticker, points] of entries) {
-        if (points?.length) next[ticker] = points;
-      }
-      setHistoryByTicker(next);
-    })();
-    return () => {
-      cancelled = true;
-    };
+    loadHistory();
+  }, [loadHistory]);
+
+  useEffect(() => {
+    const id = setInterval(() => setClock(Date.now()), 1000);
+    return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (cooldownLeft <= 0) return undefined;
+    const id = setTimeout(() => {
+      setCooldownLeft((left) => Math.max(0, left - 1));
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [cooldownLeft]);
+
+  useEffect(() => {
+    setLiveEnabled(readLiveEnabled());
+  }, []);
+
+  useEffect(() => {
+    if (!liveEnabled) {
+      liveBuffer.current = {};
+      setStreamStatus("idle");
+      return undefined;
+    }
+
+    const tickers = lots.positions.map((position) => position.ticker);
+    let socket = null;
+    let heartbeat = null;
+    let reconnectTimer = null;
+    let unmounted = false;
+
+    function teardown() {
+      clearInterval(heartbeat);
+      heartbeat = null;
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+      if (socket) {
+        socket.onopen = null;
+        socket.onmessage = null;
+        socket.onclose = null;
+        socket.onerror = null;
+        socket.close();
+        socket = null;
+      }
+    }
+
+    function connect() {
+      teardown();
+      if (unmounted || document.visibilityState !== "visible") return;
+      setStreamStatus("reconnecting");
+      const nextSocket = new WebSocket(STREAM_URL);
+      socket = nextSocket;
+      nextSocket.onopen = () => {
+        setStreamStatus("live");
+        nextSocket.send(JSON.stringify({ subscribe: tickers }));
+        heartbeat = setInterval(() => {
+          if (nextSocket.readyState === WebSocket.OPEN) {
+            nextSocket.send(JSON.stringify({ subscribe: tickers }));
+          }
+        }, 15000);
+      };
+      nextSocket.onmessage = (event) => {
+        const live = parseStreamMessage(String(event.data));
+        if (!live) return;
+        liveBuffer.current[live.ticker] = live;
+      };
+      nextSocket.onclose = () => {
+        if (unmounted || document.visibilityState !== "visible") return;
+        setStreamStatus("reconnecting");
+        reconnectTimer = setTimeout(connect, 2500);
+      };
+    }
+
+    function onVisibility() {
+      if (document.visibilityState === "visible") {
+        setStreamStatus("reconnecting");
+        reconnectTimer = setTimeout(connect, 50);
+      } else {
+        setStreamStatus("idle");
+        teardown();
+      }
+    }
+
+    setStreamStatus("reconnecting");
+    reconnectTimer = setTimeout(connect, 50);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      unmounted = true;
+      document.removeEventListener("visibilitychange", onVisibility);
+      teardown();
+    };
+  }, [liveEnabled]);
+
+  useEffect(() => {
+    if (!liveEnabled) return undefined;
+    const id = setInterval(() => {
+      const batch = liveBuffer.current;
+      const tickers = Object.keys(batch);
+      if (!tickers.length) return;
+      liveBuffer.current = {};
+      setQuotesByTicker((prev) => {
+        const next = { ...prev };
+        for (const ticker of tickers) {
+          next[ticker] = mergeLiveQuote(prev[ticker], batch[ticker]);
+        }
+        return next;
+      });
+      const nowMs = Date.now();
+      setNow(nowMs);
+      setRefreshedAt(nowMs);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [liveEnabled]);
 
   useEffect(() => {
     if (!expandedId || detailByTicker[expandedId]) return undefined;
@@ -289,7 +405,13 @@ export default function Stonks() {
         if (!res.ok) return;
         const data = await res.json();
         if (cancelled || !data.points?.length) return;
-        setDetailByTicker((prev) => ({ ...prev, [expandedId]: data.points }));
+        const fill = lots.positions.find(
+          (position) => position.ticker === expandedId
+        )?.fill;
+        setDetailByTicker((prev) => ({
+          ...prev,
+          [expandedId]: sliceHistoryFromFill(data.points, fill),
+        }));
       } catch {
         /* keep sparkline points */
       }
@@ -303,12 +425,32 @@ export default function Stonks() {
     return rankPositions(mergeRows(quotesByTicker, historyByTicker, now));
   }, [quotesByTicker, historyByTicker, now]);
 
-  const portfolio = portfolioDollars(ranked);
-  const quoteTimes = ranked
-    .map((row) => row.quoteTime)
-    .filter(Boolean)
-    .sort();
-  const asOf = quoteTimes[0] || fetchedAt;
+  const pnl = portfolioDollars(ranked);
+  const total = portfolioValue(ranked);
+  const coolingDown = cooldownLeft > 0;
+  const stream = streamUi(streamStatus);
+  const stale =
+    stream.canRefresh &&
+    isQuoteStale(refreshedAt ? clock - refreshedAt : null);
+  const refreshedLabel = stream.note
+    ? stream.note
+    : refreshedAt
+      ? formatElapsed(clock - refreshedAt)
+      : "—";
+
+  async function refreshNow() {
+    if (!stream.canRefresh || cooldownLeft > 0) return;
+    setCooldownLeft(10);
+    setDetailByTicker({});
+    await loadQuotes();
+    await loadHistory();
+  }
+
+  function setLiveMode(enabled) {
+    if (enabled === liveEnabled) return;
+    writeLiveEnabled(enabled);
+    setLiveEnabled(enabled);
+  }
 
   function chooseTheme(next) {
     setTheme(next);
@@ -348,12 +490,83 @@ export default function Stonks() {
         <header className={styles.header}>
           <h1 className={styles.title}>Stonks</h1>
           <div className={styles.portfolio}>
-            <div className={`${styles.portfolioValue} ${tone(portfolio)}`}>
-              {formatMoney(portfolio)}
+            <div
+              className={styles.portfolioValue}
+              aria-label={formatPortfolioDelta(total, pnl)}
+            >
+              <span>{Number.isFinite(total) ? total.toFixed(2) : "—"}</span>
+              <span className={tone(pnl)}>
+                {" "}
+                ({formatSignedPlain(pnl)})
+              </span>
             </div>
           </div>
         </header>
-        <p className={styles.asOf}>As of {formatQuoteTime(asOf)} ET</p>
+        <div className={styles.refreshRow}>
+          <p
+            className={`${styles.refreshNote} ${
+              stale ? styles.refreshNoteStale : ""
+            }`}
+          >
+            {refreshedLabel}
+          </p>
+          <div className={styles.refreshActions}>
+            <div
+              className={styles.modeSwitch}
+              role="radiogroup"
+              aria-label="Quote updates"
+            >
+              <button
+                type="button"
+                role="radio"
+                aria-checked={liveEnabled}
+                className={`${styles.modeOpt} ${
+                  liveEnabled ? styles.modeOn : ""
+                }`}
+                onClick={() => setLiveMode(true)}
+              >
+                auto
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!liveEnabled}
+                className={`${styles.modeOpt} ${
+                  liveEnabled ? "" : styles.modeOn
+                }`}
+                onClick={() => setLiveMode(false)}
+              >
+                manual
+              </button>
+            </div>
+            <button
+              type="button"
+              className={`${styles.refreshBtn} ${
+                stream.canRefresh ? "" : styles.refreshBtnIdle
+              }`}
+              disabled={coolingDown || !stream.canRefresh}
+              onClick={refreshNow}
+            >
+              {streamStatus === "live" || streamStatus === "reconnecting" ? (
+                <>
+                  <span
+                    className={`${styles.dot} ${
+                      streamStatus === "live"
+                        ? styles.dotLive
+                        : styles.dotReconnect
+                    }`}
+                    aria-hidden="true"
+                  />
+                  {stream.button}
+                </>
+              ) : coolingDown ? (
+                cooldownLeft
+              ) : (
+                stream.button
+              )}
+            </button>
+          </div>
+        </div>
         <div className={styles.list}>
           {ranked.map((row) => {
             const open = expandedId === row.ticker;
