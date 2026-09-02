@@ -137,10 +137,131 @@
   font-variant-numeric: tabular-nums;
 }
 
-.asOf {
-  margin: 8px 0 16px;
+.root .refreshNote {
+  margin: 0;
   font-size: 12px;
   color: var(--muted);
+}
+
+.root .refreshNoteStale {
+  color: var(--down);
+}
+
+.refreshRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 16px;
+}
+
+.refreshActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.refreshBtn {
+  flex: 0 0 auto;
+  min-width: 124px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.modeSwitch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  border: 1px solid var(--rule);
+}
+
+.root .modeOpt {
+  margin: 0;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.modeOpt + .modeOpt {
+  border-left: 1px solid var(--rule);
+}
+
+.root .modeOn {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.modeOpt:focus-visible {
+  outline: 1px solid var(--text);
+  outline-offset: 2px;
+}
+
+.refreshBtnIdle {
+  cursor: default;
+}
+
+.refreshBtnIdle:disabled {
+  color: var(--text);
+}
+
+.refreshBtn:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.refreshBtn:focus-visible {
+  outline: 1px solid var(--text);
+  outline-offset: 2px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.dotLive {
+  background: #2f9e5c;
+  animation: stonksPulse 2.4s ease-in-out infinite;
+}
+
+.dotReconnect {
+  background: #d89b2a;
+  animation: stonksPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes stonksPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.28;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dotLive,
+  .dotReconnect {
+    animation: none;
+  }
 }
 
 .list {
