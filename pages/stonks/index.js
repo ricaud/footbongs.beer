@@ -596,6 +596,7 @@ export default function Stonks() {
                 <div className={styles.row}>
                   <div className={styles.rank}>{row.rank}</div>
                   <div className={styles.identity}>
+                    <div className={styles.picker}>{row.picker}</div>
                     <div className={styles.tickerLine}>
                       <span className={styles.ticker}>{row.ticker}</span>
                       <span className={styles.name}>{row.name}</span>

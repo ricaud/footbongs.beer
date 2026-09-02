@@ -304,6 +304,13 @@
   min-width: 0;
 }
 
+.picker {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+
 .tickerLine {
   display: flex;
   align-items: baseline;
