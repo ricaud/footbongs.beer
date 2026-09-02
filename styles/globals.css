@@ -391,3 +391,18 @@ a {
     left: 65%;
     animation-delay: 2.5s;
 }
+
+html[data-stonks-theme="light"] body,
+html[data-stonks-theme="dark"] body,
+html[data-stonks-theme="golf"] body {
+    background-image: none !important;
+}
+html[data-stonks-theme="light"] body {
+    background: #f3f0ea !important;
+}
+html[data-stonks-theme="dark"] body {
+    background: #141311 !important;
+}
+html[data-stonks-theme="golf"] body {
+    background: #143323 !important;
+}

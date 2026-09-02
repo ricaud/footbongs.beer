@@ -12,7 +12,15 @@ import {
   rankPositions,
   todayPnL,
 } from "../../lib/stonks/math";
+import {
+  THEMES,
+  readStoredTheme,
+  readTheme,
+  writeStoredTheme,
+} from "../../lib/stonks/theme";
 import styles from "./stonks.module.css";
+
+const THEME_LABELS = { light: "Light", dark: "Dark", golf: "Golf" };
 
 function tone(n) {
   if (n > 0) return styles.up;
@@ -53,18 +61,13 @@ function Sparkline({ points, up }) {
   const d = linePath(points, width, height, 1.5);
   return (
     <svg
-      className={styles.spark}
+      className={`${styles.spark} ${up ? styles.up : styles.down}`}
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
       aria-hidden="true"
     >
-      <path
-        d={d}
-        fill="none"
-        stroke={up ? "#1f6b3a" : "#a32d2d"}
-        strokeWidth="1.25"
-      />
+      <path d={d} fill="none" stroke="currentColor" strokeWidth="1.25" />
     </svg>
   );
 }
@@ -93,27 +96,27 @@ function DetailChart({ points, fill }) {
   const fillY =
     pad.t + (1 - (fill - min) / span) * (height - pad.t - pad.b);
   const last = points[points.length - 1]?.close ?? fill;
-  const stroke = last >= fill ? "#1f6b3a" : "#a32d2d";
+  const up = last >= fill;
 
   const startLabel = formatQuoteTime(new Date(x0).toISOString());
   const endLabel = formatQuoteTime(new Date(x1).toISOString());
 
   return (
     <svg
-      className={styles.chart}
+      className={`${styles.chart} ${up ? styles.up : styles.down}`}
       viewBox={`0 0 ${width} ${height}`}
       role="img"
       aria-label="Price since purchase"
     >
       <line
+        className={styles.chartFill}
         x1={pad.l}
         x2={width - pad.r}
         y1={fillY}
         y2={fillY}
-        stroke="#d6d0c8"
         strokeDasharray="3 3"
       />
-      <path d={d} fill="none" stroke={stroke} strokeWidth="1.5" />
+      <path d={d} fill="none" stroke="currentColor" strokeWidth="1.5" />
       <text className={styles.axis} x={4} y={pad.t + 8}>
         {formatPrice(max)}
       </text>
@@ -176,6 +179,7 @@ function mergeRows(quotesByTicker, historyByTicker, now) {
 }
 
 export default function Stonks() {
+  const [theme, setTheme] = useState("light");
   const [quotesByTicker, setQuotesByTicker] = useState({});
   const [fetchedAt, setFetchedAt] = useState(null);
   const [historyByTicker, setHistoryByTicker] = useState({});
@@ -201,8 +205,29 @@ export default function Stonks() {
   }, []);
 
   useEffect(() => {
+    const next = readTheme();
+    setTheme(next);
+    document.documentElement.setAttribute("data-stonks-theme", next);
     document.body.classList.add(styles.bodyLock);
-    return () => document.body.classList.remove(styles.bodyLock);
+    document.body.setAttribute("data-theme", next);
+
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const onSystem = () => {
+      const stored = readStoredTheme();
+      if (stored === "light" || stored === "dark" || stored === "golf") return;
+      const systemTheme = media.matches ? "dark" : "light";
+      setTheme(systemTheme);
+      document.documentElement.setAttribute("data-stonks-theme", systemTheme);
+      document.body.setAttribute("data-theme", systemTheme);
+    };
+    media.addEventListener("change", onSystem);
+
+    return () => {
+      media.removeEventListener("change", onSystem);
+      document.body.classList.remove(styles.bodyLock);
+      document.body.removeAttribute("data-theme");
+      document.documentElement.removeAttribute("data-stonks-theme");
+    };
   }, []);
 
   useEffect(() => {
@@ -285,8 +310,15 @@ export default function Stonks() {
     .sort();
   const asOf = quoteTimes[0] || fetchedAt;
 
+  function chooseTheme(next) {
+    setTheme(next);
+    writeStoredTheme(next);
+    document.documentElement.setAttribute("data-stonks-theme", next);
+    document.body.setAttribute("data-theme", next);
+  }
+
   return (
-    <div className={styles.root}>
+    <div className={styles.root} data-theme={theme}>
       <Head>
         <title>Stonks</title>
         <link rel="icon" href="/favicon.ico" />
@@ -296,6 +328,22 @@ export default function Stonks() {
           <Link href="/" className={styles.home}>
             Home
           </Link>
+          <div className={styles.schemes} role="radiogroup" aria-label="Color scheme">
+            {THEMES.map((id) => (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={theme === id}
+                className={`${styles.scheme} ${
+                  theme === id ? styles.schemeOn : ""
+                }`}
+                onClick={() => chooseTheme(id)}
+              >
+                {THEME_LABELS[id]}
+              </button>
+            ))}
+          </div>
         </div>
         <header className={styles.header}>
           <h1 className={styles.title}>Stonks</h1>

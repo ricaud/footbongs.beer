@@ -1,14 +1,52 @@
+.root,
+.bodyLock {
+  --bg: #f3f0ea;
+  --text: #1c1917;
+  --muted: #6b6560;
+  --rule: #d6d0c8;
+  --rule-soft: #e6e0d8;
+  --up: #1f6b3a;
+  --down: #a32d2d;
+  --stale: #8a6a2f;
+}
+
+.root[data-theme="dark"],
+.bodyLock[data-theme="dark"],
+:global(html[data-stonks-theme="dark"]) .root:not([data-theme]) {
+  --bg: #141311;
+  --text: #ece8e1;
+  --muted: #9a948c;
+  --rule: #3a3530;
+  --rule-soft: #2c2926;
+  --up: #7dba8e;
+  --down: #d96a6a;
+  --stale: #c4a35a;
+}
+
+.root[data-theme="golf"],
+.bodyLock[data-theme="golf"],
+:global(html[data-stonks-theme="golf"]) .root:not([data-theme]) {
+  --bg: #143323;
+  --text: #f7f4ec;
+  --muted: #9bb5a3;
+  --rule: #2d5c42;
+  --rule-soft: #1d4832;
+  --up: #fde200;
+  --down: #ff6b6b;
+  --stale: #d4a017;
+}
+
 .root {
   min-height: 100vh;
   min-height: var(--app-height, 100vh);
-  background: #f3f0ea;
-  color: #1c1917;
+  background: var(--bg);
+  color: var(--text);
   font-family: "IBM Plex Sans", "Helvetica Neue", sans-serif;
   padding: 16px 16px 48px;
 }
 
 .bodyLock {
-  background: #f3f0ea !important;
+  background: var(--bg) !important;
   background-image: none !important;
   font-family: "IBM Plex Sans", "Helvetica Neue", sans-serif !important;
 }
@@ -31,17 +69,43 @@
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 20px;
+  gap: 16px;
 }
 
 .home {
   font-size: 13px;
-  color: #6b6560;
+  color: var(--muted);
   text-decoration: none;
   border-bottom: 1px solid transparent;
 }
 
 .home:hover {
-  border-bottom-color: #6b6560;
+  border-bottom-color: var(--muted);
+}
+
+.schemes {
+  display: flex;
+  gap: 12px;
+}
+
+.scheme {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.schemeOn {
+  color: var(--text);
+}
+
+.scheme:focus-visible,
+.card:focus-visible {
+  outline: 1px solid var(--text);
+  outline-offset: 2px;
 }
 
 .header {
@@ -50,7 +114,7 @@
   align-items: flex-end;
   gap: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #d6d0c8;
+  border-bottom: 1px solid var(--rule);
   margin-bottom: 4px;
 }
 
@@ -76,7 +140,7 @@
 .asOf {
   margin: 8px 0 16px;
   font-size: 12px;
-  color: #6b6560;
+  color: var(--muted);
 }
 
 .list {
@@ -90,7 +154,7 @@
   text-align: left;
   background: transparent;
   border: 0;
-  border-bottom: 1px solid #d6d0c8;
+  border-bottom: 1px solid var(--rule);
   border-radius: 0;
   padding: 12px 0;
   cursor: pointer;
@@ -99,11 +163,6 @@
 
 .card:hover {
   background: transparent;
-}
-
-.card:focus-visible {
-  outline: 1px solid #1c1917;
-  outline-offset: 2px;
 }
 
 .row {
@@ -116,7 +175,7 @@
 .rank {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 13px;
-  color: #6b6560;
+  color: var(--muted);
   padding-top: 3px;
 }
 
@@ -138,7 +197,7 @@
 
 .name {
   font-size: 12px;
-  color: #6b6560;
+  color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -148,7 +207,7 @@
   margin-top: 4px;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 11px;
-  color: #6b6560;
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 
@@ -171,22 +230,22 @@
 .today {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 11px;
-  color: #6b6560;
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 
 .up {
-  color: #1f6b3a;
+  color: var(--up);
 }
 
 .down {
-  color: #a32d2d;
+  color: var(--down);
 }
 
 .stale {
   font-size: 10px;
   letter-spacing: 0.04em;
-  color: #8a6a2f;
+  color: var(--stale);
   text-transform: uppercase;
 }
 
@@ -198,7 +257,7 @@
   grid-column: 2 / 4;
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e6e0d8;
+  border-top: 1px solid var(--rule-soft);
 }
 
 .stats {
@@ -210,7 +269,7 @@
 
 .stat dt {
   font-size: 11px;
-  color: #6b6560;
+  color: var(--muted);
   margin: 0;
 }
 
@@ -235,10 +294,14 @@
   display: block;
 }
 
+.chartFill {
+  stroke: var(--rule);
+}
+
 .axis {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 9px;
-  fill: #6b6560;
+  fill: var(--muted);
 }
 
 @media (min-width: 640px) {

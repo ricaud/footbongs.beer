@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --test lib/stonks/math.test.js"
+    "test": "node --test lib/stonks/*.test.js"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
