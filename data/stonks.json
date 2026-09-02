@@ -1,0 +1,14 @@
+{
+  "purchasedAt": "2026-09-02T13:30:00.000Z",
+  "cost": 400,
+  "positions": [
+    { "ticker": "DKNG", "name": "DraftKings", "shares": 16.420833, "fill": 24.36, "fileIndex": 0 },
+    { "ticker": "LLY", "name": "Eli Lilly", "shares": 0.34375, "fill": 1163.64, "fileIndex": 1 },
+    { "ticker": "TXRH", "name": "Texas Roadhouse", "shares": 2.076735, "fill": 192.61, "fileIndex": 2 },
+    { "ticker": "MRVL", "name": "Marvell Technology", "shares": 1.93977, "fill": 206.21, "fileIndex": 3 },
+    { "ticker": "NVDA", "name": "NVIDIA", "shares": 1.759943, "fill": 227.28, "fileIndex": 4 },
+    { "ticker": "LULU", "name": "lululemon", "shares": 3.311943, "fill": 120.78, "fileIndex": 5 },
+    { "ticker": "SPXL", "name": "Direxion Daily S&P 500 Bull 3X", "shares": 1.403164, "fill": 285.07, "fileIndex": 6 },
+    { "ticker": "SPCX", "name": "AXS SPAC and New Issue ETF", "shares": 2.838792, "fill": 140.91, "fileIndex": 7 }
+  ]
+}
