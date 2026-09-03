@@ -15,6 +15,7 @@ import {
   portfolioDollars,
   portfolioValue,
   rankPositions,
+  sessionOffsets,
   sliceHistoryFromFill,
   todayPnL,
 } from "../../lib/stonks/math";
@@ -113,13 +114,14 @@ function DetailChart({ points, fill }) {
   const min = Math.min(...ys, fill);
   const max = Math.max(...ys, fill);
   const span = max - min || 1;
+  const offsets = sessionOffsets(points);
+  const xSpan = offsets[offsets.length - 1] || 1;
   const x0 = points[0]?.t ?? 0;
   const x1 = points[points.length - 1]?.t ?? 1;
-  const xSpan = x1 - x0 || 1;
 
   const d = points
     .map((point, i) => {
-      const x = pad.l + ((point.t - x0) / xSpan) * (width - pad.l - pad.r);
+      const x = pad.l + (offsets[i] / xSpan) * (width - pad.l - pad.r);
       const y =
         pad.t + (1 - (point.close - min) / span) * (height - pad.t - pad.b);
       return `${i === 0 ? "M" : "L"}${x.toFixed(2)} ${y.toFixed(2)}`;
