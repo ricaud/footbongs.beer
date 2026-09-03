@@ -15,6 +15,7 @@ import {
   portfolioDollars,
   portfolioValue,
   rankPositions,
+  sessionOffsets,
   sliceHistoryFromFill,
   todayPnL,
 } from "../../lib/stonks/math";
@@ -35,6 +36,25 @@ import {
 import styles from "./stonks.module.css";
 
 const THEME_LABELS = { light: "Light", dark: "Dark", golf: "Golf" };
+const PNL_STORAGE_KEY = "stonks-pnl";
+
+function readPnlUnit() {
+  if (typeof window === "undefined") return "$";
+  try {
+    return window.localStorage.getItem(PNL_STORAGE_KEY) === "%" ? "%" : "$";
+  } catch {
+    return "$";
+  }
+}
+
+function writePnlUnit(unit) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(PNL_STORAGE_KEY, unit);
+  } catch {
+    /* private mode */
+  }
+}
 
 function tone(n) {
   if (n > 0) return styles.up;
@@ -94,13 +114,14 @@ function DetailChart({ points, fill }) {
   const min = Math.min(...ys, fill);
   const max = Math.max(...ys, fill);
   const span = max - min || 1;
+  const offsets = sessionOffsets(points);
+  const xSpan = offsets[offsets.length - 1] || 1;
   const x0 = points[0]?.t ?? 0;
   const x1 = points[points.length - 1]?.t ?? 1;
-  const xSpan = x1 - x0 || 1;
 
   const d = points
     .map((point, i) => {
-      const x = pad.l + ((point.t - x0) / xSpan) * (width - pad.l - pad.r);
+      const x = pad.l + (offsets[i] / xSpan) * (width - pad.l - pad.r);
       const y =
         pad.t + (1 - (point.close - min) / span) * (height - pad.t - pad.b);
       return `${i === 0 ? "M" : "L"}${x.toFixed(2)} ${y.toFixed(2)}`;
@@ -206,6 +227,7 @@ export default function Stonks() {
   const [cooldownLeft, setCooldownLeft] = useState(0);
   const [streamStatus, setStreamStatus] = useState("idle");
   const [liveEnabled, setLiveEnabled] = useState(true);
+  const [pnlUnit, setPnlUnit] = useState("$");
   const liveBuffer = useRef({});
 
   const loadQuotes = useCallback(async () => {
@@ -296,6 +318,7 @@ export default function Stonks() {
 
   useEffect(() => {
     setLiveEnabled(readLiveEnabled());
+    setPnlUnit(readPnlUnit());
   }, []);
 
   useEffect(() => {
@@ -427,6 +450,8 @@ export default function Stonks() {
 
   const pnl = portfolioDollars(ranked);
   const total = portfolioValue(ranked);
+  const costBasis = total - pnl;
+  const pnlPercent = costBasis !== 0 ? pnl / costBasis : 0;
   const coolingDown = cooldownLeft > 0;
   const stream = streamUi(streamStatus);
   const stale =
@@ -450,6 +475,12 @@ export default function Stonks() {
     if (enabled === liveEnabled) return;
     writeLiveEnabled(enabled);
     setLiveEnabled(enabled);
+  }
+
+  function setPnlMode(unit) {
+    if (unit === pnlUnit) return;
+    writePnlUnit(unit);
+    setPnlUnit(unit);
   }
 
   function chooseTheme(next) {
@@ -492,13 +523,45 @@ export default function Stonks() {
           <div className={styles.portfolio}>
             <div
               className={styles.portfolioValue}
-              aria-label={formatPortfolioDelta(total, pnl)}
+              aria-label={formatPortfolioDelta(total, pnl, pnlUnit)}
             >
               <span>{Number.isFinite(total) ? total.toFixed(2) : "—"}</span>
               <span className={tone(pnl)}>
                 {" "}
-                ({formatSignedPlain(pnl)})
+                (
+                {pnlUnit === "%"
+                  ? formatPercent(pnlPercent)
+                  : formatSignedPlain(pnl)}
+                )
               </span>
+            </div>
+            <div
+              className={`${styles.modeSwitch} ${styles.pnlSwitch}`}
+              role="radiogroup"
+              aria-label="P/L unit"
+            >
+              <button
+                type="button"
+                role="radio"
+                aria-checked={pnlUnit === "$"}
+                className={`${styles.modeOpt} ${
+                  pnlUnit === "$" ? styles.modeOn : ""
+                }`}
+                onClick={() => setPnlMode("$")}
+              >
+                $
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={pnlUnit === "%"}
+                className={`${styles.modeOpt} ${
+                  pnlUnit === "%" ? styles.modeOn : ""
+                }`}
+                onClick={() => setPnlMode("%")}
+              >
+                %
+              </button>
             </div>
           </div>
         </header>
@@ -596,6 +659,7 @@ export default function Stonks() {
                 <div className={styles.row}>
                   <div className={styles.rank}>{row.rank}</div>
                   <div className={styles.identity}>
+                    <div className={styles.picker}>{row.picker}</div>
                     <div className={styles.tickerLine}>
                       <span className={styles.ticker}>{row.ticker}</span>
                       <span className={styles.name}>{row.name}</span>
