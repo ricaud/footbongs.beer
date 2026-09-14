@@ -20,6 +20,7 @@ import {
   sliceHistoryFromFill,
   todayPnL,
   formatShareWhen,
+  shareCaptureStyle,
 } from "../../lib/stonks/math";
 import {
   THEMES,
@@ -482,6 +483,7 @@ export default function Stonks() {
         width: node.offsetWidth,
         height: node.offsetHeight,
         skipFonts: true,
+        style: shareCaptureStyle(),
       });
       if (!blob) return;
       const file = new File([blob], "stonks.png", { type: "image/png" });
