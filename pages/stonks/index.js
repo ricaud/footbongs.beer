@@ -21,6 +21,7 @@ import {
   todayPnL,
   formatShareWhen,
   shareCaptureStyle,
+  portfolioTodayDollars,
 } from "../../lib/stonks/math";
 import {
   THEMES,
@@ -90,6 +91,18 @@ function linePath(points, width, height, pad) {
       return `${i === 0 ? "M" : "L"}${x.toFixed(2)} ${y.toFixed(2)}`;
     })
     .join(" ");
+}
+
+function ShareMetric({ dollars, percent, label }) {
+  return (
+    <span className={styles.shareCol}>
+      {label ? <span className={styles.shareLabel}>{label}</span> : null}
+      <span className={`${styles.shareColAmt} ${tone(dollars)}`}>
+        {formatMoney(dollars)}
+      </span>
+      <span className={styles.shareColPct}>{formatPercent(percent)}</span>
+    </span>
+  );
 }
 
 function Sparkline({ points, up }) {
@@ -457,6 +470,9 @@ export default function Stonks() {
   const total = portfolioValue(ranked);
   const costBasis = total - pnl;
   const pnlPercent = costBasis !== 0 ? pnl / costBasis : 0;
+  const todayDollars = portfolioTodayDollars(ranked);
+  const yesterdayValue = total - todayDollars;
+  const todayPercent = yesterdayValue !== 0 ? todayDollars / yesterdayValue : 0;
   const coolingDown = cooldownLeft > 0;
   const stream = streamUi(streamStatus);
   const stale =
@@ -782,32 +798,33 @@ export default function Stonks() {
           aria-hidden="true"
         >
           <div className={styles.shareHead}>
-            <div className={styles.shareTitle}>Stonks</div>
-            <div className={styles.shareTotal}>
-              <span>{Number.isFinite(total) ? total.toFixed(2) : "—"}</span>
-              <span className={tone(pnl)}>
-                {" "}
-                (
-                {pnlUnit === "%"
-                  ? formatPercent(pnlPercent)
-                  : formatSignedPlain(pnl)}
-                )
-              </span>
+            <div className={styles.shareBrand}>
+              <div className={styles.shareTitle}>Stonks</div>
+              <div className={styles.shareWhen}>{formatShareWhen(clock)}</div>
+              <div className={styles.shareTotal}>
+                {Number.isFinite(total) ? total.toFixed(2) : "—"}
+              </div>
             </div>
+            <ShareMetric label="Total" dollars={pnl} percent={pnlPercent} />
+            <ShareMetric
+              label="Today"
+              dollars={todayDollars}
+              percent={todayPercent}
+            />
           </div>
-          <div className={styles.shareWhen}>{formatShareWhen(clock)}</div>
           <div className={styles.shareList}>
             {boardRows.map((row) => (
               <div key={row.ticker} className={styles.shareRow}>
                 <span className={styles.shareRank}>{row.rank}</span>
-                <span className={styles.sharePicker}>{row.picker}</span>
-                <span className={styles.shareTicker}>{row.ticker}</span>
-                <span
-                  className={`${styles.sharePnl} ${tone(row.percent)}`}
-                >
-                  <span>{formatMoney(row.dollars)}</span>
-                  <span>{formatPercent(row.percent)}</span>
+                <span className={styles.shareWho}>
+                  <span className={styles.sharePicker}>{row.picker}</span>
+                  <span className={styles.shareTicker}>{row.ticker}</span>
                 </span>
+                <ShareMetric dollars={row.dollars} percent={row.percent} />
+                <ShareMetric
+                  dollars={row.todayDollars}
+                  percent={row.todayPercent}
+                />
               </div>
             ))}
           </div>
