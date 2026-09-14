@@ -16,8 +16,10 @@ import {
   portfolioValue,
   rankPositions,
   sessionOffsets,
+  shareRows,
   sliceHistoryFromFill,
   todayPnL,
+  formatShareWhen,
 } from "../../lib/stonks/math";
 import {
   THEMES,
@@ -228,7 +230,9 @@ export default function Stonks() {
   const [streamStatus, setStreamStatus] = useState("idle");
   const [liveEnabled, setLiveEnabled] = useState(true);
   const [pnlUnit, setPnlUnit] = useState("$");
+  const [sharing, setSharing] = useState(false);
   const liveBuffer = useRef({});
+  const shareRef = useRef(null);
 
   const loadQuotes = useCallback(async () => {
     try {
@@ -462,6 +466,42 @@ export default function Stonks() {
     : refreshedAt
       ? formatElapsed(clock - refreshedAt)
       : "—";
+  const boardRows = useMemo(() => shareRows(ranked), [ranked]);
+
+  async function shareBoard() {
+    const node = shareRef.current;
+    if (!node || sharing) return;
+    setSharing(true);
+    try {
+      const { toBlob } = await import("html-to-image");
+      const backgroundColor = getComputedStyle(node).backgroundColor;
+      const blob = await toBlob(node, {
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor,
+        width: node.offsetWidth,
+        height: node.offsetHeight,
+        skipFonts: true,
+      });
+      if (!blob) return;
+      const file = new File([blob], "stonks.png", { type: "image/png" });
+      setSharing(false);
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Stonks" });
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "stonks.png";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+    } finally {
+      setSharing(false);
+    }
+  }
 
   async function refreshNow() {
     if (!stream.canRefresh || cooldownLeft > 0) return;
@@ -574,6 +614,14 @@ export default function Stonks() {
             {refreshedLabel}
           </p>
           <div className={styles.refreshActions}>
+            <button
+              type="button"
+              className={`${styles.refreshBtn} ${styles.shareBtn}`}
+              disabled={sharing || !ranked.length}
+              onClick={shareBoard}
+            >
+              {sharing ? "…" : "Share"}
+            </button>
             <div
               className={styles.modeSwitch}
               role="radiogroup"
@@ -725,6 +773,42 @@ export default function Stonks() {
               </article>
             );
           })}
+        </div>
+        <div
+          ref={shareRef}
+          className={styles.shareCard}
+          aria-hidden="true"
+        >
+          <div className={styles.shareHead}>
+            <div className={styles.shareTitle}>Stonks</div>
+            <div className={styles.shareTotal}>
+              <span>{Number.isFinite(total) ? total.toFixed(2) : "—"}</span>
+              <span className={tone(pnl)}>
+                {" "}
+                (
+                {pnlUnit === "%"
+                  ? formatPercent(pnlPercent)
+                  : formatSignedPlain(pnl)}
+                )
+              </span>
+            </div>
+          </div>
+          <div className={styles.shareWhen}>{formatShareWhen(clock)}</div>
+          <div className={styles.shareList}>
+            {boardRows.map((row) => (
+              <div key={row.ticker} className={styles.shareRow}>
+                <span className={styles.shareRank}>{row.rank}</span>
+                <span className={styles.sharePicker}>{row.picker}</span>
+                <span className={styles.shareTicker}>{row.ticker}</span>
+                <span
+                  className={`${styles.sharePnl} ${tone(row.percent)}`}
+                >
+                  <span>{formatMoney(row.dollars)}</span>
+                  <span>{formatPercent(row.percent)}</span>
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
