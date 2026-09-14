@@ -16,8 +16,12 @@ import {
   portfolioValue,
   rankPositions,
   sessionOffsets,
+  shareRows,
   sliceHistoryFromFill,
   todayPnL,
+  formatShareWhen,
+  shareCaptureStyle,
+  portfolioTodayDollars,
 } from "../../lib/stonks/math";
 import {
   THEMES,
@@ -87,6 +91,20 @@ function linePath(points, width, height, pad) {
       return `${i === 0 ? "M" : "L"}${x.toFixed(2)} ${y.toFixed(2)}`;
     })
     .join(" ");
+}
+
+function ShareMetric({ dollars, percent, label }) {
+  return (
+    <span className={styles.shareCol}>
+      {label ? <span className={styles.shareLabel}>{label}</span> : null}
+      <span className={styles.sharePair}>
+        <span className={`${styles.shareColAmt} ${tone(dollars)}`}>
+          {formatMoney(dollars)}
+        </span>
+        <span className={styles.shareColPct}>{formatPercent(percent)}</span>
+      </span>
+    </span>
+  );
 }
 
 function Sparkline({ points, up }) {
@@ -228,7 +246,9 @@ export default function Stonks() {
   const [streamStatus, setStreamStatus] = useState("idle");
   const [liveEnabled, setLiveEnabled] = useState(true);
   const [pnlUnit, setPnlUnit] = useState("$");
+  const [sharing, setSharing] = useState(false);
   const liveBuffer = useRef({});
+  const shareRef = useRef(null);
 
   const loadQuotes = useCallback(async () => {
     try {
@@ -452,6 +472,9 @@ export default function Stonks() {
   const total = portfolioValue(ranked);
   const costBasis = total - pnl;
   const pnlPercent = costBasis !== 0 ? pnl / costBasis : 0;
+  const todayDollars = portfolioTodayDollars(ranked);
+  const yesterdayValue = total - todayDollars;
+  const todayPercent = yesterdayValue !== 0 ? todayDollars / yesterdayValue : 0;
   const coolingDown = cooldownLeft > 0;
   const stream = streamUi(streamStatus);
   const stale =
@@ -462,6 +485,43 @@ export default function Stonks() {
     : refreshedAt
       ? formatElapsed(clock - refreshedAt)
       : "—";
+  const boardRows = useMemo(() => shareRows(ranked), [ranked]);
+
+  async function shareBoard() {
+    const node = shareRef.current;
+    if (!node || sharing) return;
+    setSharing(true);
+    try {
+      const { toBlob } = await import("html-to-image");
+      const backgroundColor = getComputedStyle(node).backgroundColor;
+      const blob = await toBlob(node, {
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor,
+        width: node.offsetWidth,
+        height: node.offsetHeight,
+        skipFonts: true,
+        style: shareCaptureStyle(),
+      });
+      if (!blob) return;
+      const file = new File([blob], "stonks.png", { type: "image/png" });
+      setSharing(false);
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Stonks" });
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "stonks.png";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+    } finally {
+      setSharing(false);
+    }
+  }
 
   async function refreshNow() {
     if (!stream.canRefresh || cooldownLeft > 0) return;
@@ -574,6 +634,14 @@ export default function Stonks() {
             {refreshedLabel}
           </p>
           <div className={styles.refreshActions}>
+            <button
+              type="button"
+              className={`${styles.refreshBtn} ${styles.shareBtn}`}
+              disabled={sharing || !ranked.length}
+              onClick={shareBoard}
+            >
+              {sharing ? "…" : "Share"}
+            </button>
             <div
               className={styles.modeSwitch}
               role="radiogroup"
@@ -725,6 +793,46 @@ export default function Stonks() {
               </article>
             );
           })}
+        </div>
+        <div
+          ref={shareRef}
+          className={styles.shareCard}
+          aria-hidden="true"
+        >
+          <div className={styles.shareHead}>
+            <div className={styles.shareBrand}>
+              <div className={styles.shareTitle}>Stonks</div>
+              <div className={styles.shareWhen}>{formatShareWhen(clock)}</div>
+              <div className={styles.shareTotal}>
+                {Number.isFinite(total) ? total.toFixed(2) : "—"}
+              </div>
+            </div>
+            <ShareMetric label="Total" dollars={pnl} percent={pnlPercent} />
+            <ShareMetric
+              label="Today"
+              dollars={todayDollars}
+              percent={todayPercent}
+            />
+          </div>
+          {boardRows.map((row) => (
+            <div key={row.ticker} className={styles.shareRow}>
+              <span className={styles.shareRank}>{row.rank}</span>
+              <span className={styles.shareWho}>
+                <span className={styles.sharePicker}>{row.picker}</span>
+                <span className={styles.shareTicker}>
+                  {row.ticker}{" "}
+                  <span className={styles.shareLast}>
+                    ({formatPrice(row.last)})
+                  </span>
+                </span>
+              </span>
+              <ShareMetric dollars={row.dollars} percent={row.percent} />
+              <ShareMetric
+                dollars={row.todayDollars}
+                percent={row.todayPercent}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>
