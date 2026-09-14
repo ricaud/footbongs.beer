@@ -97,10 +97,12 @@ function ShareMetric({ dollars, percent, label }) {
   return (
     <span className={styles.shareCol}>
       {label ? <span className={styles.shareLabel}>{label}</span> : null}
-      <span className={`${styles.shareColAmt} ${tone(dollars)}`}>
-        {formatMoney(dollars)}
+      <span className={styles.sharePair}>
+        <span className={`${styles.shareColAmt} ${tone(dollars)}`}>
+          {formatMoney(dollars)}
+        </span>
+        <span className={styles.shareColPct}>{formatPercent(percent)}</span>
       </span>
-      <span className={styles.shareColPct}>{formatPercent(percent)}</span>
     </span>
   );
 }
@@ -812,22 +814,25 @@ export default function Stonks() {
               percent={todayPercent}
             />
           </div>
-          <div className={styles.shareList}>
-            {boardRows.map((row) => (
-              <div key={row.ticker} className={styles.shareRow}>
-                <span className={styles.shareRank}>{row.rank}</span>
-                <span className={styles.shareWho}>
-                  <span className={styles.sharePicker}>{row.picker}</span>
-                  <span className={styles.shareTicker}>{row.ticker}</span>
+          {boardRows.map((row) => (
+            <div key={row.ticker} className={styles.shareRow}>
+              <span className={styles.shareRank}>{row.rank}</span>
+              <span className={styles.shareWho}>
+                <span className={styles.sharePicker}>{row.picker}</span>
+                <span className={styles.shareTicker}>
+                  {row.ticker}{" "}
+                  <span className={styles.shareLast}>
+                    ({formatPrice(row.last)})
+                  </span>
                 </span>
-                <ShareMetric dollars={row.dollars} percent={row.percent} />
-                <ShareMetric
-                  dollars={row.todayDollars}
-                  percent={row.todayPercent}
-                />
-              </div>
-            ))}
-          </div>
+              </span>
+              <ShareMetric dollars={row.dollars} percent={row.percent} />
+              <ShareMetric
+                dollars={row.todayDollars}
+                percent={row.todayPercent}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>
